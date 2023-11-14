@@ -1,6 +1,7 @@
 package com.example.individuell.security;
 
 
+import com.example.individuell.repositories.UserRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,27 +11,27 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CustomUserDetails implements UserDetailsService {
-
-    Hash hash;
-
-    public CustomUserDetails(Hash hash) {
-        this.hash = hash;
+    UserRepository userRepository;
+    public CustomUserDetails(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        if (email == null){
+        com.example.individuell.models.User user = userRepository.findByEmail(email);
+
+        if (user == null){
             throw new UsernameNotFoundException("User not found");
         }
-        String encode = hash.passwordEncoder().encode("password");
 
-        UserDto admin = new UserDto("admin",encode);
-        System.out.println(admin.getEmail());
-        System.out.println(admin.getPassword());
-
+        UserDto userDto = new UserDto(user.getEmail(), user.getPassword());
+        System.out.println(userDto.getEmail());
+        System.out.println(userDto.getPassword());
+        System.out.println(user.getEmail());
+        System.out.println(user.getPassword());
         return User.builder()
-                .username(admin.getEmail())
-                .password(admin.getPassword())
+                .username(user.getEmail())
+                .password(user.getPassword())
                 .build();
 
     }

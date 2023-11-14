@@ -1,5 +1,6 @@
 package com.example.individuell.security;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,13 +8,17 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@EnableRedisHttpSession
 public class SecurityConfig {
 
     private final CustomUserDetails userDetails;
@@ -24,26 +29,34 @@ public class SecurityConfig {
         this.userDetails = userDetails;
         this.hash = hash;
     }
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
 
+        return http.
+                    authorizeHttpRequests((auth) -> {
+                        auth.requestMatchers("/register").permitAll();
+                        auth.requestMatchers("/login").permitAll();
+                        auth.requestMatchers("/users").authenticated();
+                        auth.requestMatchers("/users{id}").authenticated();
+                        auth.requestMatchers("/secured-login").authenticated();
+                        auth.requestMatchers("/set-session").authenticated();
+                        auth.requestMatchers("/get-session").authenticated();
+                        auth.requestMatchers("/session-expired").authenticated();
+                    })
+                .csrf().disable() // Lös sen....
+                .formLogin(withDefaults())
+                .formLogin((login) -> login.defaultSuccessUrl("/set-session"))
+                .sessionManagement(session -> {
+                    session.invalidSessionUrl("/session-expired");
+                    session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+                })
+                .build();
+    }
     @Bean
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetails);
         provider.setPasswordEncoder(hash.passwordEncoder());
         return provider;
-    }
-
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        System.out.println(http);
-        return http.
-                    authorizeHttpRequests((auth) -> {
-                       auth.requestMatchers("/login").permitAll();
-                       auth.requestMatchers("/secured-login").authenticated();
-                    })
-                .formLogin(withDefaults())
-                .formLogin((login) -> login.defaultSuccessUrl("/secured-login"))
-                .build();
     }
 }
