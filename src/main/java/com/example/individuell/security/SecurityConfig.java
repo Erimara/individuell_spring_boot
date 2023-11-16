@@ -9,20 +9,13 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
-
 import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
 @EnableWebSecurity
-@EnableRedisHttpSession
 public class SecurityConfig {
 
     private final CustomUserDetails userDetails;
-
     Hash hash;
     @Autowired
     public SecurityConfig(CustomUserDetails userDetails, Hash hash) {
@@ -43,12 +36,12 @@ public class SecurityConfig {
                         auth.requestMatchers("/get-session").authenticated();
                         auth.requestMatchers("/session-expired").authenticated();
                     })
-                .csrf().disable() // Lös sen....
+                .csrf().disable()// Lös sen....
                 .formLogin(withDefaults())
                 .formLogin((login) -> login.defaultSuccessUrl("/set-session"))
                 .sessionManagement(session -> {
                     session.invalidSessionUrl("/session-expired");
-                    session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+                    session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
                 })
                 .build();
     }

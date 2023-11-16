@@ -10,23 +10,26 @@ public class SessionController {
 
 
     @GetMapping("/set-session")
-    public ResponseEntity<String> setSessionAttribute(HttpSession session){
-        session.setAttribute("user", "example");
-        System.out.println(session);
-        System.out.println("created: " + session.getCreationTime());
-        System.out.println("expiraton time: " + session.getLastAccessedTime());
+    public ResponseEntity<String> setSessionAttribute(){
+        /*session.setAttribute("user", "example");*/
+      /*  System.out.println("session created time: " + session.getCreationTime());
+        System.out.println("session expiraton time: " + session.getLastAccessedTime());*/
+
         return ResponseEntity.ok("Session attribute is set");
     }
 
 
     @GetMapping("/get-session")
-    public ResponseEntity<String> getSessionAttribute(HttpSession session){
-        Object user = session.getAttribute("user");
-        return ResponseEntity.ok("Session attribute: " + user.toString());
+    public ResponseEntity<String> getSessionAttribute(){
+        /*Object user = session.getAttribute("user");*/
+
+        return ResponseEntity.ok("Session attribute");
     }
 
     @GetMapping("/session-expired")
-    String expiredSession(){
+    String expiredSession(HttpSession session)
+    {
+        session.invalidate();
         return "session expired";
     }
 }
