@@ -30,12 +30,14 @@ public class SecurityConfig {
                         auth.requestMatchers("/register").permitAll();
                         auth.requestMatchers("/login").permitAll();
                         auth.requestMatchers("/users",
+                                "/users/{id}",
                                 "/secured-login",
                                 "/set-session",
                                 "/session-expired",
                                 "/upload-file",
                                 "/files",
-                                "/folders"
+                                "/folders",
+                                "create-folder/user/{id}"
                                 ).authenticated();
                     })
                 .csrf().disable()// Lös sen....

@@ -1,6 +1,7 @@
 package com.example.individuell.services;
 
 import com.example.individuell.Assemblers.UserModelAssembler;
+import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.UserRepository;
 import com.example.individuell.security.Hash;
@@ -11,6 +12,7 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,5 +50,11 @@ public class UserService {
         return ResponseEntity.
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel.getContent());
+    }
+
+    public ResponseEntity<User> createFolder(User user, String id){
+        User updatedUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Could not find user"));
+        updatedUser.setMyFolders(user.getMyFolders());
+        return ResponseEntity.ok(userRepository.save(updatedUser));
     }
 }

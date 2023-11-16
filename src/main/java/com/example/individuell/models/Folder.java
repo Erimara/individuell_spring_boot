@@ -15,9 +15,7 @@ import java.util.List;
 public class Folder {
     @Id
     private String id;
-
     private String folderName;
-
     @DBRef
     private List<File> myFiles;
 

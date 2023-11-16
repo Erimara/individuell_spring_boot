@@ -36,4 +36,9 @@ private UserService userService;
     ResponseEntity<User> createUser(@RequestBody User user){
         return userService.registerUser(user);
     }
+
+    @PutMapping("/create-folder/user/{id}")
+    ResponseEntity<User> createFolder(@RequestBody User user, @PathVariable String id){
+        return userService.createFolder(user,id);
+    }
 }
