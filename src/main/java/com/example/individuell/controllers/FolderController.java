@@ -1,0 +1,30 @@
+package com.example.individuell.controllers;
+import com.example.individuell.models.Folder;
+import com.example.individuell.services.FolderService;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+@RestController
+public class FolderController {
+    FolderService folderService;
+    public FolderController(FolderService folderService) {
+        this.folderService = folderService;
+    }
+    @PostMapping("/folders")
+    public ResponseEntity<Folder> createFolder(@RequestBody Folder folder) {
+        return folderService.createFolder(folder);
+    }
+    @GetMapping("/folders/{id}")
+    public ResponseEntity<?> getFolderById(@PathVariable String id){
+        return folderService.getFolderById(id);
+    }
+    @GetMapping("/folders")
+    public CollectionModel<EntityModel<Folder>> getAllFolders(){
+        return folderService.getAllFolders();
+    }
+    @DeleteMapping("/folders/{id}")
+    public ResponseEntity<Folder> deleteFolderById(@PathVariable String id){
+        return folderService.deleteFolderById(id);
+    }
+}

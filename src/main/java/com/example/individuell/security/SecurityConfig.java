@@ -29,12 +29,14 @@ public class SecurityConfig {
                     authorizeHttpRequests((auth) -> {
                         auth.requestMatchers("/register").permitAll();
                         auth.requestMatchers("/login").permitAll();
-                        auth.requestMatchers("/users").authenticated();
-                        auth.requestMatchers("/users{id}").authenticated();
-                        auth.requestMatchers("/secured-login").authenticated();
-                        auth.requestMatchers("/set-session").authenticated();
-                        auth.requestMatchers("/get-session").authenticated();
-                        auth.requestMatchers("/session-expired").authenticated();
+                        auth.requestMatchers("/users",
+                                "/secured-login",
+                                "/set-session",
+                                "/session-expired",
+                                "/upload-file",
+                                "/files",
+                                "/folders"
+                                ).authenticated();
                     })
                 .csrf().disable()// Lös sen....
                 .formLogin(withDefaults())

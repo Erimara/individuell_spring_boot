@@ -4,6 +4,7 @@ import com.example.individuell.Assemblers.UserModelAssembler;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.UserRepository;
 import com.example.individuell.security.Hash;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -22,6 +23,7 @@ public class UserService {
 
     Hash hash;
 
+    @Autowired
     public UserService(UserRepository userRepository, UserModelAssembler assembler, Hash hash) {
         this.userRepository = userRepository;
         this.assembler = assembler;
