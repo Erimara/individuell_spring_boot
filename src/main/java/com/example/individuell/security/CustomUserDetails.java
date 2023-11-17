@@ -5,6 +5,7 @@ import com.example.individuell.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,7 +24,7 @@ import java.util.UUID;
 
 
 @Service
-@EnableRedisIndexedHttpSession
+@EnableRedisHttpSession
 public class CustomUserDetails implements UserDetailsService {
     UserRepository userRepository;
 
@@ -45,9 +46,11 @@ public class CustomUserDetails implements UserDetailsService {
         }
 
 
-       /* String sessionId = UUID.randomUUID().toString();
+        //TODO: Authentication.getprincipa() -> get session -> set session duration so user is logged out after X amount of minutes
+
+        String sessionId = UUID.randomUUID().toString();
         Duration duration = Duration.ofMinutes(1);
-        redisTemplate.opsForValue().set("session:" + sessionId, email, duration);*/
+        redisTemplate.opsForValue().set("session:" + sessionId, email, duration);
 
         return User.builder()
                 .username(user.getEmail())
