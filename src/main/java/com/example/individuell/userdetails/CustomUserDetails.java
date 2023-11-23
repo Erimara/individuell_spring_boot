@@ -1,4 +1,4 @@
-package com.example.individuell.security;
+package com.example.individuell.userdetails;
 
 
 import com.example.individuell.repositories.UserRepository;
@@ -24,11 +24,9 @@ import java.util.UUID;
 
 
 @Service
-@EnableRedisHttpSession
+//@EnableRedisHttpSession Not needed atm, is enabled through application.properties
 public class CustomUserDetails implements UserDetailsService {
     UserRepository userRepository;
-
-
     private final StringRedisTemplate redisTemplate;
     @Autowired
     public CustomUserDetails(UserRepository userRepository,
@@ -48,9 +46,9 @@ public class CustomUserDetails implements UserDetailsService {
 
         //TODO: Authentication.getprincipa() -> get session -> set session duration so user is logged out after X amount of minutes
 
-        String sessionId = UUID.randomUUID().toString();
+      /*  String sessionId = UUID.randomUUID().toString();
         Duration duration = Duration.ofMinutes(1);
-        redisTemplate.opsForValue().set("session:" + sessionId, email, duration);
+        redisTemplate.opsForValue().set("session:" + sessionId, email, duration);*/
 
         return User.builder()
                 .username(user.getEmail())

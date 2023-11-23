@@ -1,12 +1,10 @@
 package com.example.individuell.security;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
+import com.example.individuell.userdetails.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -16,9 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-
-import java.util.Set;
-
 import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
@@ -55,11 +50,12 @@ public class SecurityConfig {
                 .formLogin(withDefaults())
                 .formLogin((login) -> {
                     login.defaultSuccessUrl("/set-session");
-
+                    login.successHandler(authenticationSuccessHandler());
                 })
                 .sessionManagement(session -> {
                     session.invalidSessionUrl("/session-expired");
                     session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+                    session.maximumSessions(1);
 
                 })
                 .logout((logOut -> {
@@ -80,20 +76,33 @@ public class SecurityConfig {
     }
 
     private LogoutHandler logOutHandler(){
+        //TODO: Do cleanup
         return ((request, response, authentication) ->
+
         {
+            request.getSession().invalidate();
             if (authentication != null) {
-                getKeys(authentication.getName());
-                System.out.println(authentication.getName() + " logged out");
+                deleteKey(authentication.getName());
+                System.out.println(authentication.getPrincipal() + " logged out");
             }
         }
         );
     }
 
-    private void authenticationSuccessHandler(){
+    private AuthenticationSuccessHandler authenticationSuccessHandler(){
+        //TODO: Send a cookie with the session to the user
 
+        return (((request, response, authentication) -> {
+            System.out.println(authentication.getPrincipal() + " this is principal");
+            //Cookie session = new Cookie("session", authentication.getPrincipal().toString());
+        /*    session.setMaxAge(10);
+            response.addCookie(session);
+            System.out.println(session);*/
+            System.out.println(authentication.getDetails()+ " details of user");
+        }));
     }
-    private void getKeys(String email){
+    private void deleteKey(String email){
             redisTemplate.opsForValue().getOperations().delete(email);
     }
+
 }

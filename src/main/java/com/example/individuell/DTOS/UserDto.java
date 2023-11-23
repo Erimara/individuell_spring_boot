@@ -1,4 +1,4 @@
-package com.example.individuell.security;
+package com.example.individuell.DTOS;
 
 import lombok.Getter;
 import lombok.Setter;
