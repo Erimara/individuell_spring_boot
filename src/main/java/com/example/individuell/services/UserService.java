@@ -11,10 +11,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +19,7 @@ public class UserService {
 
     UserRepository userRepository;
     UserModelAssembler assembler;
+
 
     Hash hash;
 
@@ -33,6 +31,7 @@ public class UserService {
     }
 
     public CollectionModel<EntityModel<User>> getAllUsers(){
+
         List<EntityModel<User>> users = userRepository.findAll()
                 .stream()
                 .map(assembler::toModel)
@@ -52,9 +51,12 @@ public class UserService {
                 .body(entityModel.getContent());
     }
 
-    public ResponseEntity<User> createFolder(User user, String id){
+    public User createFolder(User user, String id){
+
         User updatedUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Could not find user"));
         updatedUser.setMyFolders(user.getMyFolders());
-        return ResponseEntity.ok(userRepository.save(updatedUser));
+        User savedUser = userRepository.save(updatedUser);
+        return savedUser;
     }
+
 }

@@ -17,6 +17,8 @@ public class Folder {
     private String id;
     private String folderName;
     @DBRef
+    private User folderOwner;
+    @DBRef
     private List<File> myFiles;
 
     public Folder() {}

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,8 +30,8 @@ public class SecurityConfig {
         this.redisTemplate = redisTemplate;
     }
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        return http.
+    public SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception{
+        return https.
                     authorizeHttpRequests((auth) -> {
                         auth.requestMatchers("/register").permitAll();
                         auth.requestMatchers("/login").permitAll();
@@ -55,8 +56,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> {
                     session.invalidSessionUrl("/session-expired");
                     session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
-                    session.maximumSessions(1);
-
+                    session.maximumSessions(1).maxSessionsPreventsLogin(true);
                 })
                 .logout((logOut -> {
                     logOut.logoutUrl("/logout");
@@ -78,12 +78,11 @@ public class SecurityConfig {
     private LogoutHandler logOutHandler(){
         //TODO: Do cleanup
         return ((request, response, authentication) ->
-
         {
             request.getSession().invalidate();
             if (authentication != null) {
+                System.out.println(authentication.getName() + " has logged out");
                 deleteKey(authentication.getName());
-                System.out.println(authentication.getPrincipal() + " logged out");
             }
         }
         );
@@ -93,12 +92,11 @@ public class SecurityConfig {
         //TODO: Send a cookie with the session to the user
 
         return (((request, response, authentication) -> {
-            System.out.println(authentication.getPrincipal() + " this is principal");
+            System.out.println(authentication.getName() + " has logged in");
             //Cookie session = new Cookie("session", authentication.getPrincipal().toString());
         /*    session.setMaxAge(10);
             response.addCookie(session);
             System.out.println(session);*/
-            System.out.println(authentication.getDetails()+ " details of user");
         }));
     }
     private void deleteKey(String email){

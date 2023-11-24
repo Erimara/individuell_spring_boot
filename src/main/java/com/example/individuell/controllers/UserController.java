@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -39,6 +40,6 @@ private UserService userService;
 
     @PutMapping("/create-folder/user/{id}")
     ResponseEntity<User> createFolder(@RequestBody User user, @PathVariable String id){
-        return userService.createFolder(user,id);
+        return ResponseEntity.ok(userService.createFolder(user,id));
     }
 }
