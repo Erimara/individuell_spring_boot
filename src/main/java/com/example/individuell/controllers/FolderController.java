@@ -16,6 +16,10 @@ public class FolderController {
     public ResponseEntity<Folder> createFolder(@RequestBody Folder folder) {
         return folderService.createFolder(folder);
     }
+    @GetMapping("/my-folders")
+    public CollectionModel<EntityModel<Folder>> viewMyFolders(){
+        return folderService.viewMyFolders();
+    }
     @GetMapping("/folders/{id}")
     public ResponseEntity<?> getFolderById(@PathVariable String id){
         return folderService.getFolderById(id);

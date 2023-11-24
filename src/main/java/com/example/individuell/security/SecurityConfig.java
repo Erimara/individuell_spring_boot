@@ -44,7 +44,9 @@ public class SecurityConfig {
                                 "/files",
                                 "/folders",
                                 "/create-folder/user/{id}",
-                                "/logout"
+                                "/logout",
+                                "my-folders",
+                                "my-files"
                                 ).authenticated();
                     })
                 .csrf().disable()  // Lös sen....

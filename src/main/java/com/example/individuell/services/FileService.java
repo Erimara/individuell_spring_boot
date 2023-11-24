@@ -2,7 +2,9 @@ package com.example.individuell.services;
 
 import com.example.individuell.Assemblers.FileModelAssembler;
 import com.example.individuell.models.File;
+import com.example.individuell.models.User;
 import com.example.individuell.repositories.FileRepository;
+import com.example.individuell.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -14,31 +16,34 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class FileService {
 
     FileRepository fileRepository;
-
+    UserRepository userRepository;
     FileModelAssembler assembler;
-
     @Autowired
-    public FileService(FileRepository fileRepository, FileModelAssembler assembler) {
+    public FileService(FileRepository fileRepository, UserRepository userRepository, FileModelAssembler assembler) {
         this.fileRepository = fileRepository;
+        this.userRepository = userRepository;
         this.assembler = assembler;
     }
     public ResponseEntity<File> handleFileUpload(MultipartFile file) throws IOException {
         HashMap<String, String> fileMap = new HashMap<>();
+        String getUsername = fileRepository.getLoggedInUser().getName();
+        User user = userRepository.findByEmail(getUsername);
         File savedFile = new File();
         fileMap.put("Filename: ", file.getOriginalFilename());
         fileMap.put("Bytes: ", file.getBytes().toString());
         fileMap.put("File type: ", file.getContentType());
-
+        savedFile.setFileOwner(user);
         savedFile.setFileProperties(fileMap);
         fileRepository.save(savedFile);
         EntityModel<File> entityModel = assembler.toModel(savedFile);
+        //TODO: Double check the hyperlinks to the fileOwner
         return ResponseEntity.
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel.getContent());
@@ -49,6 +54,18 @@ public class FileService {
                 .stream()
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
+
+        return CollectionModel.of(files);
+    }
+    public CollectionModel<EntityModel<File>> viewMyFiles(){
+        String username = fileRepository.getLoggedInUser().getName();
+        User user = userRepository.findByEmail(username);
+        List<EntityModel<File>> files = fileRepository.findAll()
+                .stream()
+                .filter(x -> Objects.equals(x.getFileOwner().getId(), user.getId()))
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
+
         return CollectionModel.of(files);
     }
     public ResponseEntity<?> getFileById(String id){

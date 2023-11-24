@@ -20,11 +20,14 @@ public class FileController {
     public FileController(FileService fileService) {
         this.fileService = fileService;
     }
-
-
     @PostMapping("/upload-file")
     public ResponseEntity<File> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
         return fileService.handleFileUpload(file);
+    }
+
+    @GetMapping("/my-files")
+    public CollectionModel<EntityModel<File>> viewMyFiles(){
+        return fileService.viewMyFiles();
     }
     @GetMapping("/files/{id}")
     public ResponseEntity<?> getFileById(@PathVariable String id){

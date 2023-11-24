@@ -15,7 +15,9 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,29 +37,33 @@ public class FolderService {
     }
 
     public ResponseEntity<Folder> createFolder(Folder folder) {
-        //TODO : WHEN I CREATE  A FOLDER, THEN THE METHOD FETCHES THE PRINCIPAL
-        // AND AUTOMATICALLY ADDS THE USER AS THE OWNER OF SAID FOLDER
-        //TODO: GIVEN I AM LOGGED IN, WHEN I NAVIGATE TO MY CREATENEWFOLDER ENDPOINT THEN I CAN CREATE A NEW FOLDER.
-
-        // TODO: I NEED TO SET THE FOLDEROWNER TO THE USER ID; TO DO THIS I NEED TO GET THE ID OF THE CURRENT LOGGED IN USER;
-
         String username = folderRepository.getLoggedInUser().getName();
         User user = userRepository.findByEmail(username);
         folder.setFolderOwner(user);
         EntityModel<Folder> entityModel = assembler.toModel(folderRepository.save(folder));
+        //TODO: Add hyperlink to the folderOwner
         return ResponseEntity.
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel.getContent());
     }
 
     public CollectionModel<EntityModel<Folder>> getAllFolders(){
-
-
         List<EntityModel<Folder>> folders = folderRepository.findAll()
                 .stream()
                 .map(assembler::toModel)
                 .collect(Collectors.toList());
 
+        return CollectionModel.of(folders);
+    }
+
+    public CollectionModel<EntityModel<Folder>> viewMyFolders(){
+        String username = folderRepository.getLoggedInUser().getName();
+        User user = userRepository.findByEmail(username);
+        List<EntityModel<Folder>> folders = folderRepository.findAll()
+                .stream()
+                .filter(x -> Objects.equals(x.getFolderOwner().getId(), user.getId()))
+                .map(assembler::toModel)
+                .collect(Collectors.toList());
         return CollectionModel.of(folders);
     }
     public ResponseEntity<?> getFolderById(String id){
