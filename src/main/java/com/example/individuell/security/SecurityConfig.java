@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,18 +37,19 @@ public class SecurityConfig {
                         auth.requestMatchers("/users",
                                 "/users/{id}",
                                 "/secured-login",
-                                "/set-session",
                                 "/session-expired",
                                 "/upload-file",
-                                "/files",
-                                "/folders",
+                                "/files", //SET ADMIN ONLY ACCESS
+                                "/folders", //SET ADMIN ONLY ACCESS
                                 "/create-folder/user/{id}",
                                 "/logout",
                                 "my-folders",
-                                "my-files"
+                                "my-files",
+                                "my-files/{id}",
+                                "upload-file/{id}"
                                 ).authenticated();
                     })
-                .csrf().disable()  // Lös sen....
+                .csrf().disable()  // Lös sen..... This works with browser, but I need to figure out a postman solution
                 .formLogin(withDefaults())
                 .formLogin((login) -> {
                     login.defaultSuccessUrl("/set-session");

@@ -17,8 +17,8 @@ public class SessionEventListener {
     public void processSessionCreatedEvent(SessionCreatedEvent event) {
         SessionCreatedEvent sess = event.getSession();
         String sess_id = event.getSessionId();
-        System.out.println(sess);
-        System.out.println(sess_id);
+        System.out.println(sess + "lightweeeeight");
+        System.out.println(sess_id + "yeeee baby");
 
     }
 

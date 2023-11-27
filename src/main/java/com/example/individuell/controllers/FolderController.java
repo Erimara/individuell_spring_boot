@@ -28,7 +28,7 @@ public class FolderController {
     public CollectionModel<EntityModel<Folder>> getAllFolders(){
         return folderService.getAllFolders();
     }
-    @DeleteMapping("/folders/{id}")
+    @DeleteMapping("/my-folders/{id}")
     public ResponseEntity<Folder> deleteFolderById(@PathVariable String id){
         return folderService.deleteFolderById(id);
     }

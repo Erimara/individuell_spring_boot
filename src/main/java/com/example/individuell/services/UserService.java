@@ -45,6 +45,7 @@ public class UserService {
     public ResponseEntity<User> registerUser(User user){
         String encoded = hash.passwordEncoder().encode(user.getPassword());
         user.setPassword(encoded);
+        user.setRole("USER");
         EntityModel<User> entityModel = assembler.toModel(userRepository.save(user));
         return ResponseEntity.
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())

@@ -24,7 +24,10 @@ public class FileController {
     public ResponseEntity<File> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
         return fileService.handleFileUpload(file);
     }
-
+    @PostMapping("/upload-file/{id}")
+    public ResponseEntity<File> uploadFileToFolder(@RequestParam("file") MultipartFile file, @PathVariable String id) throws IOException {
+        return fileService.uploadFileToFolder(file, id);
+    }
     @GetMapping("/my-files")
     public CollectionModel<EntityModel<File>> viewMyFiles(){
         return fileService.viewMyFiles();
@@ -39,7 +42,7 @@ public class FileController {
         return fileService.getAllFiles();
     }
 
-    @DeleteMapping("/files/{id}")
+    @DeleteMapping("/my-files/{id}")
     public ResponseEntity<File> deleteFileById(@PathVariable String id){
         return fileService.deleteFileById(id);
     }
