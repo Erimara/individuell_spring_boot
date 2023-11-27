@@ -2,6 +2,9 @@ package com.example.individuell.security;
 
 
 import com.example.individuell.userdetails.CustomUserDetails;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,9 +14,14 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+
+import java.io.IOException;
+import java.time.Duration;
+
 import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
@@ -34,10 +42,9 @@ public class SecurityConfig {
                     authorizeHttpRequests((auth) -> {
                         auth.requestMatchers("/register").permitAll();
                         auth.requestMatchers("/login").permitAll();
+                        auth.requestMatchers("/start-page").permitAll();
                         auth.requestMatchers("/users",
                                 "/users/{id}",
-                                "/secured-login",
-                                "/session-expired",
                                 "/upload-file",
                                 "/files", //SET ADMIN ONLY ACCESS
                                 "/folders", //SET ADMIN ONLY ACCESS
@@ -46,23 +53,25 @@ public class SecurityConfig {
                                 "my-folders",
                                 "my-files",
                                 "my-files/{id}",
-                                "upload-file/{id}"
+                                "upload-file/{id}",
+                                "login-successful"
                                 ).authenticated();
                     })
                 .csrf().disable()  // Lös sen..... This works with browser, but I need to figure out a postman solution
                 .formLogin(withDefaults())
                 .formLogin((login) -> {
-                    login.defaultSuccessUrl("/set-session");
+                    login.defaultSuccessUrl("/login-successful");
                     login.successHandler(authenticationSuccessHandler());
                 })
                 .sessionManagement(session -> {
-                    session.invalidSessionUrl("/session-expired");
+                    session.invalidSessionUrl("/start-page");
                     session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
                     session.maximumSessions(1).maxSessionsPreventsLogin(true);
+
                 })
                 .logout((logOut -> {
                     logOut.logoutUrl("/logout");
-                    logOut.logoutSuccessUrl("/login");
+                    logOut.logoutSuccessUrl("/start-page");
                     logOut.clearAuthentication(true);
                     logOut.invalidateHttpSession(true);
                     logOut.addLogoutHandler(logOutHandler());
@@ -77,12 +86,28 @@ public class SecurityConfig {
         return provider;
     }
 
+
+    private void cookieHandler(HttpServletRequest request, HttpServletResponse response, Authentication authentication){
+
+            Cookie[] cookies = request.getCookies();
+            for (Cookie cookie : cookies){
+                if (cookie.getName().equals("duration") && cookie.getMaxAge() < System.currentTimeMillis()){
+                    request.getSession().invalidate();
+                    System.out.println("session invalidated");
+                    System.out.println(authentication.getName() + " has logged out");
+                    deleteKey(authentication.getName());
+                }
+            }
+
+        }
+    }
     private LogoutHandler logOutHandler(){
         //TODO: Do cleanup
         return ((request, response, authentication) ->
         {
-            request.getSession().invalidate();
             if (authentication != null) {
+                request.getSession().invalidate();
+                System.out.println("session invalidated");
                 System.out.println(authentication.getName() + " has logged out");
                 deleteKey(authentication.getName());
             }
@@ -95,10 +120,12 @@ public class SecurityConfig {
 
         return (((request, response, authentication) -> {
             System.out.println(authentication.getName() + " has logged in");
-            //Cookie session = new Cookie("session", authentication.getPrincipal().toString());
-        /*    session.setMaxAge(10);
-            response.addCookie(session);
-            System.out.println(session);*/
+            response.sendRedirect("/login-successful");
+            Duration duration = Duration.ofMinutes(2);
+            Cookie cookie = new Cookie("duration", "somefkingvalue");
+            cookie.setMaxAge(60);
+            response.addCookie(cookie);
+
         }));
     }
     private void deleteKey(String email){

@@ -8,4 +8,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class LoginController {
 
 
+    @GetMapping("/login-successful")
+    public String loginSuccess(){
+        return """
+                Login successful.
+                
+                Welcome!
+                """;
+    }
+    @GetMapping("/start-page")
+    public String startPage(){
+        return "Welcome to the startpage, please log in to proceed";
+    }
+
 }

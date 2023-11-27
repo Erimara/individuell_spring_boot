@@ -16,13 +16,6 @@ private UserService userService;
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
-    @GetMapping("/secured-login")
-    String secured(){
-        return "hello secured login";
-    }
-
-
     @GetMapping("/users")
     public CollectionModel<EntityModel<User>> getAllUsers(){
         return userService.getAllUsers();
