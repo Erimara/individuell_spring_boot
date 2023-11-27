@@ -1,6 +1,10 @@
 package com.example.individuell.services;
 
+import com.example.individuell.Assemblers.FileDtoModelAssembler;
 import com.example.individuell.Assemblers.FileModelAssembler;
+import com.example.individuell.DTOS.FileDto;
+import com.example.individuell.DTOS.UserDto;
+import com.example.individuell.Exceptions.FileNotFoundException;
 import com.example.individuell.models.File;
 import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
@@ -25,21 +29,18 @@ public class FileService {
     FileRepository fileRepository;
     UserRepository userRepository;
     FileModelAssembler assembler;
-
+    FileDtoModelAssembler dtoAssembler;
     FolderRepository folderRepository;
     @Autowired
-    public FileService(FileRepository fileRepository,
-                       UserRepository userRepository,
-                       FileModelAssembler assembler,
-                       FolderRepository folderRepository)
-    {
+    public FileService(FileRepository fileRepository, UserRepository userRepository, FileModelAssembler assembler, FileDtoModelAssembler dtoAssembler, FolderRepository folderRepository) {
         this.fileRepository = fileRepository;
         this.userRepository = userRepository;
         this.assembler = assembler;
+        this.dtoAssembler = dtoAssembler;
         this.folderRepository = folderRepository;
     }
 
-    public ResponseEntity<File> handleFileUpload(MultipartFile file) throws IOException {
+    public ResponseEntity<File> uploadSingleFile(MultipartFile file) throws IOException {
         HashMap<String, String> fileMap = new HashMap<>();
         String getUsername = fileRepository.getLoggedInUser().getName();
         User user = userRepository.findByEmail(getUsername);
@@ -88,19 +89,23 @@ public class FileService {
 
         return CollectionModel.of(files);
     }
-    public CollectionModel<EntityModel<File>> viewMyFiles(){
+    public CollectionModel<EntityModel<FileDto>> viewMyFiles(){
         String username = fileRepository.getLoggedInUser().getName();
         User user = userRepository.findByEmail(username);
-        List<EntityModel<File>> files = fileRepository.findAll()
+        List<EntityModel<FileDto>> files = fileRepository.findAll()
                 .stream()
                 .filter(x -> Objects.equals(x.getFileOwner().getId(), user.getId()))
-                .map(assembler::toModel)
+                .map((file) -> {
+                    FileDto fileDto = new FileDto(file.getId(),file.getFileProperties(), file.getFileOwner().getEmail());
+                            return dtoAssembler.toModel(fileDto);
+                })
                 .collect(Collectors.toList());
 
         return CollectionModel.of(files);
     }
-    public ResponseEntity<?> getFileById(String id){
-        return ResponseEntity.ok(fileRepository.findById(id));
+    public File getFileById(String id) throws FileNotFoundException {
+        return fileRepository.findById(id).orElseThrow(() ->
+                new FileNotFoundException("Could not find file with id:" + id));
     }
 
     public ResponseEntity<File> deleteFileById(String id){

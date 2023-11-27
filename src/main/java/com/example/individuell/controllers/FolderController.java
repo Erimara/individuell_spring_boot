@@ -1,4 +1,5 @@
 package com.example.individuell.controllers;
+import com.example.individuell.DTOS.FolderDto;
 import com.example.individuell.models.Folder;
 import com.example.individuell.services.FolderService;
 import org.springframework.hateoas.CollectionModel;
@@ -17,7 +18,7 @@ public class FolderController {
         return folderService.createFolder(folder);
     }
     @GetMapping("/my-folders")
-    public CollectionModel<EntityModel<Folder>> viewMyFolders(){
+    public CollectionModel<EntityModel<FolderDto>> viewMyFolders(){
         return folderService.viewMyFolders();
     }
     @GetMapping("/folders/{id}")

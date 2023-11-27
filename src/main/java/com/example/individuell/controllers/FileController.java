@@ -1,5 +1,7 @@
 package com.example.individuell.controllers;
 
+import com.example.individuell.DTOS.FileDto;
+import com.example.individuell.Exceptions.FileNotFoundException;
 import com.example.individuell.models.File;
 import com.example.individuell.services.FileService;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,20 +23,20 @@ public class FileController {
         this.fileService = fileService;
     }
     @PostMapping("/upload-file")
-    public ResponseEntity<File> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
-        return fileService.handleFileUpload(file);
+    public ResponseEntity<File> uploadSingleFile(@RequestParam("file") MultipartFile file) throws IOException {
+        return fileService.uploadSingleFile(file);
     }
     @PostMapping("/upload-file/{id}")
     public ResponseEntity<File> uploadFileToFolder(@RequestParam("file") MultipartFile file, @PathVariable String id) throws IOException {
         return fileService.uploadFileToFolder(file, id);
     }
     @GetMapping("/my-files")
-    public CollectionModel<EntityModel<File>> viewMyFiles(){
+    public CollectionModel<EntityModel<FileDto>> viewMyFiles(){
         return fileService.viewMyFiles();
     }
     @GetMapping("/files/{id}")
-    public ResponseEntity<?> getFileById(@PathVariable String id){
-        return fileService.getFileById(id);
+    public ResponseEntity<File> getFileById(@PathVariable String id) throws FileNotFoundException {
+        return ResponseEntity.ok(fileService.getFileById(id));
     }
 
     @GetMapping("/files")

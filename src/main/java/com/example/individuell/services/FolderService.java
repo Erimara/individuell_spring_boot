@@ -1,6 +1,8 @@
 package com.example.individuell.services;
 
+import com.example.individuell.Assemblers.FolderDtoModelAssembler;
 import com.example.individuell.Assemblers.FolderModelAssembler;
+import com.example.individuell.DTOS.FolderDto;
 import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.FolderRepository;
@@ -24,15 +26,16 @@ import java.util.stream.Collectors;
 public class FolderService {
 
     FolderRepository folderRepository;
-
     UserRepository userRepository;
     FolderModelAssembler assembler;
+    FolderDtoModelAssembler dtoAssembler;
     AuthenticationProvider authenticationProvider;
-
-    public FolderService(FolderRepository folderRepository, UserRepository userRepository, FolderModelAssembler assembler, AuthenticationProvider authenticationProvider) {
+    @Autowired
+    public FolderService(FolderRepository folderRepository, UserRepository userRepository, FolderModelAssembler assembler, FolderDtoModelAssembler dtoAssembler, AuthenticationProvider authenticationProvider) {
         this.folderRepository = folderRepository;
         this.userRepository = userRepository;
         this.assembler = assembler;
+        this.dtoAssembler = dtoAssembler;
         this.authenticationProvider = authenticationProvider;
     }
 
@@ -56,13 +59,16 @@ public class FolderService {
         return CollectionModel.of(folders);
     }
 
-    public CollectionModel<EntityModel<Folder>> viewMyFolders(){
+    public CollectionModel<EntityModel<FolderDto>> viewMyFolders(){
         String username = folderRepository.getLoggedInUser().getName();
         User user = userRepository.findByEmail(username);
-        List<EntityModel<Folder>> folders = folderRepository.findAll()
+        List<EntityModel<FolderDto>> folders = folderRepository.findAll()
                 .stream()
                 .filter(x -> Objects.equals(x.getFolderOwner().getId(), user.getId()))
-                .map(assembler::toModel)
+                .map(folder -> {
+                    FolderDto folderDto = new FolderDto(folder.getId(), folder.getFolderName(), folder.getFolderOwner().getEmail());
+                    return dtoAssembler.toModel(folderDto);
+                })
                 .collect(Collectors.toList());
         return CollectionModel.of(folders);
     }
