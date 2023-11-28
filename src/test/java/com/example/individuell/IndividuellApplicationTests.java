@@ -1,65 +1,37 @@
 package com.example.individuell;
-
 import com.example.individuell.models.File;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.FileRepository;
 import com.example.individuell.repositories.UserRepository;
-import com.example.individuell.security.Hash;
-import com.example.individuell.services.FileService;
-import com.example.individuell.services.UserService;
-import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringRunner;
 import java.util.HashMap;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-
-/*
-* 1: Test to see user registration
-* 2: Test to see if a file is getting uploaded
-* 3: Test to see if file can be deleted
-*/
-
-
-
-
 @SpringBootTest
 class IndividuellApplicationTests {
     UserRepository userRepository;
     FileRepository fileRepository;
     @Autowired
-    public IndividuellApplicationTests(UserRepository userRepository, FileRepository fileRepository)
-    {
+    public IndividuellApplicationTests(UserRepository userRepository, FileRepository fileRepository) {
         this.userRepository = userRepository;
         this.fileRepository = fileRepository;
-
     }
 
     @Test
     void userRegistration() {
-        //Create user
         User testUser = new User();
         testUser.setId("test-id-user");
         testUser.setEmail("Hello@world.se");
         testUser.setPassword("hello-word");
-        //Save user
 
         userRepository.save(testUser);
-
-        //Find user
         User user = userRepository.findById(testUser.getId()).orElseThrow(()-> new RuntimeException("Could not find user"));
 
-        //Assert user
         Assertions.assertNotNull(user);
         Assertions.assertTrue(userRepository.existsById(user.getId()));
-
     }
 
     @Test
