@@ -1,4 +1,4 @@
-package com.example.individuell.security;
+package com.example.individuell.session;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.session.events.SessionCreatedEvent;

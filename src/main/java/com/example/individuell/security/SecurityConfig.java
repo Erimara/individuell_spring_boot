@@ -26,7 +26,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
     private final CustomUserDetails userDetails;
     Hash hash;
     private final StringRedisTemplate redisTemplate;
@@ -87,20 +86,7 @@ public class SecurityConfig {
     }
 
 
-    private void cookieHandler(HttpServletRequest request, HttpServletResponse response, Authentication authentication){
 
-            Cookie[] cookies = request.getCookies();
-            for (Cookie cookie : cookies){
-                if (cookie.getName().equals("duration") && cookie.getMaxAge() < System.currentTimeMillis()){
-                    request.getSession().invalidate();
-                    System.out.println("session invalidated");
-                    System.out.println(authentication.getName() + " has logged out");
-                    deleteKey(authentication.getName());
-                }
-            }
-
-        }
-    }
     private LogoutHandler logOutHandler(){
         //TODO: Do cleanup
         return ((request, response, authentication) ->
@@ -115,17 +101,18 @@ public class SecurityConfig {
         );
     }
 
+
     private AuthenticationSuccessHandler authenticationSuccessHandler(){
         //TODO: Send a cookie with the session to the user
 
         return (((request, response, authentication) -> {
             System.out.println(authentication.getName() + " has logged in");
             response.sendRedirect("/login-successful");
-            Duration duration = Duration.ofMinutes(2);
             Cookie cookie = new Cookie("duration", "somefkingvalue");
             cookie.setMaxAge(60);
             response.addCookie(cookie);
-
+            response.addCookie(new Cookie("hello", "world"));
+            redisTemplate.opsForValue().set("email", "value");
         }));
     }
     private void deleteKey(String email){
