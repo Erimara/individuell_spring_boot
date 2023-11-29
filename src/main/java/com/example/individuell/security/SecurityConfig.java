@@ -52,8 +52,9 @@ public class SecurityConfig {
                                 "my-folders",
                                 "my-files",
                                 "my-files/{id}",
-                                "upload-file/{id}",
-                                "login-successful"
+                                "folder/upload-file/{id}",
+                                "login-successful",
+                                "files/download/{id}"
                                 ).authenticated();
                     })
                 .csrf().disable()  // Lös sen..... This works with browser, but I need to figure out a postman solution

@@ -57,7 +57,6 @@ class IndividuellApplicationTests {
         File retrieveSavedFile = fileRepository.findById(savedFile.getId()).orElseThrow(() -> new RuntimeException("File not found"));
         Assertions.assertTrue(fileRepository.existsById(retrieveSavedFile.getId()));
     }
-
     @Test
     void removeFile(){
         File testFile = new File();
@@ -69,12 +68,9 @@ class IndividuellApplicationTests {
         fileRepository.findById("test-id-remove-file").ifPresent(presentFile -> fileRepository.deleteById(presentFile.getId()));
         Assertions.assertFalse(fileRepository.existsById(testFile.getId()));
     }
-
     @AfterEach
     void removeTestData(){
         fileRepository.findById("test-id-file").ifPresent(presentFile -> fileRepository.deleteById(presentFile.getId()));
         userRepository.findById("test-id-user").ifPresent(presentUser -> userRepository.deleteById(presentUser.getId()));
     }
-
-
 }

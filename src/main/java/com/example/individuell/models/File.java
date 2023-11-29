@@ -15,6 +15,7 @@ import java.util.HashMap;
 public class File {
     @Id
     private String id;
+    private String name;
     private HashMap<String, String> fileProperties;
     @DBRef
     private User fileOwner;

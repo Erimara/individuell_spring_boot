@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class FolderDto {
@@ -11,10 +13,12 @@ public class FolderDto {
     private String id;
     private String folderName;
     private String folderOwner;
+    private List<String> files;
 
-    public FolderDto(String id, String folderName, String folderOwner) {
+    public FolderDto(String id, String folderName, String folderOwner, List<String> files) {
         this.id = id;
         this.folderName = folderName;
         this.folderOwner = folderOwner;
+        this.files = files;
     }
 }
