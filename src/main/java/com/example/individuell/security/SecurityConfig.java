@@ -21,6 +21,9 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
@@ -67,7 +70,6 @@ public class SecurityConfig {
                     session.invalidSessionUrl("/start-page");
                     session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
                     session.maximumSessions(1).maxSessionsPreventsLogin(true);
-
                 })
                 .logout((logOut -> {
                     logOut.logoutUrl("/logout");
@@ -94,6 +96,7 @@ public class SecurityConfig {
         {
             if (authentication != null) {
                 request.getSession().invalidate();
+
                 System.out.println("session invalidated");
                 System.out.println(authentication.getName() + " has logged out");
                 deleteKey(authentication.getName());
@@ -104,16 +107,20 @@ public class SecurityConfig {
 
 
     private AuthenticationSuccessHandler authenticationSuccessHandler(){
-        //TODO: Send a cookie with the session to the user
-
+        //TODO: Send a cookie with the session to the user)
         return (((request, response, authentication) -> {
+            String uniqueId = UUID.randomUUID().toString();
             System.out.println(authentication.getName() + " has logged in");
-            response.sendRedirect("/login-successful");
-            Cookie cookie = new Cookie("duration", "somefkingvalue");
-            cookie.setMaxAge(60);
+            Cookie cookie = new Cookie("duration", uniqueId);
+            int durationInMinutes = 2;
+            int durationInSeconds = durationInMinutes * 60;
+            cookie.setMaxAge(durationInSeconds);
             response.addCookie(cookie);
-            response.addCookie(new Cookie("hello", "world"));
-            redisTemplate.opsForValue().set("email", "value");
+            long expiredTime = System.currentTimeMillis() + (durationInSeconds * 1000);
+            String uniqueKey = "duration:" + uniqueId;
+            System.out.println("Logged in: " + "user:" + authentication.getName() + " time: " + System.currentTimeMillis()
+                    + "session expires at: " + expiredTime );
+            redisTemplate.opsForValue().set(uniqueKey, String.valueOf(expiredTime));
         }));
     }
     private void deleteKey(String email){

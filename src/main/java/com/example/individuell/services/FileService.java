@@ -102,7 +102,7 @@ public class FileService {
                     return CollectionModel.of(files);
     }
 
-    public ByteArrayResource downloadFile(String id) throws FileNotFoundException, IOException {
+    public ByteArrayResource downloadFile(String id) throws FileNotFoundException {
         File file = fileRepository.findById(id)
                 .orElseThrow(() -> new FileNotFoundException("Could not find file with id:" + id));
         byte[] bytes = file.getFileProperties().get("Bytes: ").getBytes();
