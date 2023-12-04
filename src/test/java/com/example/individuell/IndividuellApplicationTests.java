@@ -3,29 +3,31 @@ import com.example.individuell.models.File;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.FileRepository;
 import com.example.individuell.repositories.UserRepository;
+import com.example.individuell.userdetails.CustomUserDetails;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+
 import java.util.HashMap;
+import java.util.List;
+
 @SpringBootTest
 class IndividuellApplicationTests {
+    @Autowired
     UserRepository userRepository;
+    @Autowired
     FileRepository fileRepository;
     @Autowired
-    public IndividuellApplicationTests(UserRepository userRepository, FileRepository fileRepository) {
-        this.userRepository = userRepository;
-        this.fileRepository = fileRepository;
-    }
-
+    CustomUserDetails userDetails;
     @Test
     void userRegistration() {
         User testUser = new User();
         testUser.setId("test-id-user");
         testUser.setEmail("Hello@world.se");
-        testUser.setPassword("hello-word");
+        testUser.setPassword("hello-world");
 
         userRepository.save(testUser);
         User user = userRepository.findById(testUser.getId()).orElseThrow(()-> new RuntimeException("Could not find user"));
@@ -68,6 +70,11 @@ class IndividuellApplicationTests {
         fileRepository.findById("test-id-remove-file").ifPresent(presentFile -> fileRepository.deleteById(presentFile.getId()));
         Assertions.assertFalse(fileRepository.existsById(testFile.getId()));
     }
+
+    @Test
+    void loginMultipleUsers(){
+            userDetails.loadUserByUsername("erik@email.se");
+        };
     @AfterEach
     void removeTestData(){
         fileRepository.findById("test-id-file").ifPresent(presentFile -> fileRepository.deleteById(presentFile.getId()));

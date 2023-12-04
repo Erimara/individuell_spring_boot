@@ -1,10 +1,9 @@
 package com.example.individuell.security;
 
 
+import com.example.individuell.session.SessionManager;
 import com.example.individuell.userdetails.CustomUserDetails;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,16 +13,14 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
-import java.io.IOException;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
@@ -49,8 +46,8 @@ public class SecurityConfig {
                                 "/users/{id}",
                                 "/upload-file",
                                 "/files", //SET ADMIN ONLY ACCESS
-                                "/folders", //SET ADMIN ONLY ACCESS
-                                "/create-folder/user/{id}",
+                                "/create-folder",
+                                "/folder/user/{id}",
                                 "/logout",
                                 "my-folders",
                                 "my-files",
@@ -60,7 +57,12 @@ public class SecurityConfig {
                                 "files/download/{id}"
                                 ).authenticated();
                     })
-                .csrf().disable()  // Lös sen..... This works with browser, but I need to figure out a postman solution
+                .csrf().disable() // Needed for postman login, can remove for browser-login
+        /*csrf -> {
+            csrf.ignoringRequestMatchers("/login")
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler());
+        })*/
                 .formLogin(withDefaults())
                 .formLogin((login) -> {
                     login.defaultSuccessUrl("/login-successful");
@@ -70,6 +72,7 @@ public class SecurityConfig {
                     session.invalidSessionUrl("/start-page");
                     session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
                     session.maximumSessions(1).maxSessionsPreventsLogin(true);
+                    session.sessionFixation().migrateSession();
                 })
                 .logout((logOut -> {
                     logOut.logoutUrl("/logout");
@@ -96,10 +99,9 @@ public class SecurityConfig {
         {
             if (authentication != null) {
                 request.getSession().invalidate();
-
-                System.out.println("session invalidated");
+                System.out.println("Session invalidated");
                 System.out.println(authentication.getName() + " has logged out");
-                deleteKey(authentication.getName());
+
             }
         }
         );
@@ -107,12 +109,11 @@ public class SecurityConfig {
 
 
     private AuthenticationSuccessHandler authenticationSuccessHandler(){
-        //TODO: Send a cookie with the session to the user)
         return (((request, response, authentication) -> {
             String uniqueId = UUID.randomUUID().toString();
             System.out.println(authentication.getName() + " has logged in");
             Cookie cookie = new Cookie("duration", uniqueId);
-            int durationInMinutes = 2;
+            int durationInMinutes = 5;
             int durationInSeconds = durationInMinutes * 60;
             cookie.setMaxAge(durationInSeconds);
             response.addCookie(cookie);
@@ -123,8 +124,4 @@ public class SecurityConfig {
             redisTemplate.opsForValue().set(uniqueKey, String.valueOf(expiredTime));
         }));
     }
-    private void deleteKey(String email){
-            redisTemplate.opsForValue().getOperations().delete(email);
-    }
-
 }

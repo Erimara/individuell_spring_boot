@@ -13,12 +13,13 @@ public class FolderController {
     public FolderController(FolderService folderService) {
         this.folderService = folderService;
     }
-    @PostMapping("/folders")
+    @PostMapping("/create-folder")
     public ResponseEntity<Folder> createFolder(@RequestBody Folder folder) {
         return folderService.createFolder(folder);
     }
     @GetMapping("/my-folders")
     public CollectionModel<EntityModel<FolderDto>> viewMyFolders(){
+
         return folderService.viewMyFolders();
     }
     @GetMapping("/folders/{id}")

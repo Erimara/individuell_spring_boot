@@ -1,8 +1,11 @@
 package com.example.individuell.controllers;
 
+import com.example.individuell.Assemblers.FileDtoModelAssembler;
 import com.example.individuell.DTOS.FileDto;
 import com.example.individuell.Exceptions.FileNotFoundException;
 import com.example.individuell.models.File;
+import com.example.individuell.models.User;
+import com.example.individuell.repositories.FileRepository;
 import com.example.individuell.services.FileService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ByteArrayResource;
@@ -17,14 +20,21 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.util.stream.Collectors;
 
 @RestController
 public class FileController {
 
     FileService fileService;
 
-    public FileController(FileService fileService) {
+    FileDtoModelAssembler fileDtoModelAssembler;
+
+    FileRepository fileRepository;
+
+    public FileController(FileService fileService,FileDtoModelAssembler fileDtoModelAssembler,FileRepository fileRepository) {
         this.fileService = fileService;
+        this.fileDtoModelAssembler = fileDtoModelAssembler;
+        this.fileRepository = fileRepository;
     }
     @PostMapping("/upload-file")
     public ResponseEntity<File> uploadSingleFile(@RequestParam("file") MultipartFile file) throws IOException {
@@ -36,7 +46,10 @@ public class FileController {
     }
     @GetMapping("/my-files")
     public CollectionModel<EntityModel<FileDto>> viewMyFiles(){
-        return fileService.viewMyFiles();
+        String user = fileRepository.getLoggedInUser().getName();
+        var myFiles =  fileService.viewMyFiles(user).stream().map((file) -> fileDtoModelAssembler.toModel(file))
+                .collect(Collectors.toList());
+        return CollectionModel.of(myFiles);
     }
     @GetMapping("/files/{id}")
     public ResponseEntity<File> getFileById(@PathVariable String id) throws FileNotFoundException {

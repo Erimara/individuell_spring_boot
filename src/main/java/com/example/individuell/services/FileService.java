@@ -11,6 +11,9 @@ import com.example.individuell.repositories.FileRepository;
 import com.example.individuell.repositories.FolderRepository;
 import com.example.individuell.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -47,11 +50,12 @@ public class FileService {
         File savedFile = generateFile(file, fileMap, user);
         fileRepository.save(savedFile);
         EntityModel<File> entityModel = assembler.toModel(savedFile);
-        //TODO: Double check the hyperlinks to the fileOwner
+
         return ResponseEntity.
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel.getContent());
     }
+
     public ResponseEntity<File> uploadFileToFolder(MultipartFile file, String id) throws IOException {
         HashMap<String, String> fileMap = new HashMap<>();
         String getUsername = fileRepository.getLoggedInUser().getName();
@@ -88,18 +92,15 @@ public class FileService {
                 .collect(Collectors.toList());
         return CollectionModel.of(files);
     }
-    public CollectionModel<EntityModel<FileDto>> viewMyFiles(){
-        String username = fileRepository.getLoggedInUser().getName();
+
+    @Cacheable(value = "my-files")
+    public List<FileDto> viewMyFiles(String username) {
         User user = userRepository.findByEmail(username);
-        List<EntityModel<FileDto>> files = fileRepository.findAll()
+        return fileRepository.findAll()
                 .stream()
                 .filter(x -> Objects.equals(x.getFileOwner().getId(), user.getId()))
-                .map((file) -> {
-                    FileDto fileDto = new FileDto(file.getId(),file.getFileProperties(), file.getFileOwner().getEmail());
-                    return dtoAssembler.toModel(fileDto);
-                    })
-                    .collect(Collectors.toList());
-                    return CollectionModel.of(files);
+                .map((file) -> new FileDto(file.getId(), file.getFileProperties(), file.getFileOwner().getEmail()))
+                .collect(Collectors.toList());
     }
 
     public ByteArrayResource downloadFile(String id) throws FileNotFoundException {

@@ -6,11 +6,12 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
+import java.io.Serializable;
 import java.util.HashMap;
 
 @Getter
 @Setter
-public class FileDto {
+public class FileDto implements Serializable {
 
 
     @Id

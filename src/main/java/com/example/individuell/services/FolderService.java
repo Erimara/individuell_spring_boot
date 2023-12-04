@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class FolderService {
-
     FolderRepository folderRepository;
     UserRepository userRepository;
     FolderModelAssembler assembler;
