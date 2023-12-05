@@ -53,7 +53,6 @@ public class UserService {
     }
 
     public User createFolder(User user, String id){
-
         User updatedUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Could not find user"));
         updatedUser.setMyFolders(user.getMyFolders());
         User savedUser = userRepository.save(updatedUser);
