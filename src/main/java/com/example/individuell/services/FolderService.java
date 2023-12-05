@@ -2,25 +2,17 @@ package com.example.individuell.services;
 
 import com.example.individuell.Assemblers.FolderDtoModelAssembler;
 import com.example.individuell.Assemblers.FolderModelAssembler;
-import com.example.individuell.DTOS.FileDto;
 import com.example.individuell.DTOS.FileInFolderDto;
 import com.example.individuell.DTOS.FolderDto;
-import com.example.individuell.Exceptions.FileNotFoundException;
 import com.example.individuell.Exceptions.FolderNotFoundException;
-import com.example.individuell.models.File;
 import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.FolderRepository;
 import com.example.individuell.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

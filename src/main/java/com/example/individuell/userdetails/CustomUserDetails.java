@@ -4,8 +4,6 @@ package com.example.individuell.userdetails;
 import com.example.individuell.repositories.UserRepository;
 import com.example.individuell.DTOS.LoginDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

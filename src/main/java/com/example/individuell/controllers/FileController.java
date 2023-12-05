@@ -5,14 +5,11 @@ import com.example.individuell.Assemblers.FileModelAssembler;
 import com.example.individuell.DTOS.FileDto;
 import com.example.individuell.Exceptions.FileNotFoundException;
 import com.example.individuell.models.File;
-import com.example.individuell.models.User;
 import com.example.individuell.repositories.FileRepository;
 import com.example.individuell.repositories.UserRepository;
 import com.example.individuell.services.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -21,10 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -53,9 +47,9 @@ public class FileController {
     /**
      * Post method to upload a single file, without a connection to a folder
      *
-     * @param file
+     * @param file is a Multipart file, which is a class in spring boot
      * @return ResponseEntity<file>
-     * @throws IOException
+     * @throws IOException exception is needed to be able to handle errors when uploading
      */
     @PostMapping("/upload-file")
     public ResponseEntity<File> uploadSingleFile(@RequestParam("file") MultipartFile file) throws IOException {
@@ -68,10 +62,10 @@ public class FileController {
     /**
      * Post method to upload a file to a specific folder
      *
-     * @param file
-     * @param id
+     * @param file is a Multipart file, which is a class in spring boot
+     * @param id gets the id of a specific folder
      * @return ResponseEntity<file>
-     * @throws IOException
+     * @throws IOException exception is needed to be able to handle errors when uploading
      */
     @PostMapping("/folder/upload-file/{id}")
     public ResponseEntity<File> uploadFileToFolder(@RequestParam("file") MultipartFile file, @PathVariable String id) throws IOException {
@@ -83,7 +77,6 @@ public class FileController {
 
     /**
      * Getter method to fetch all the files from the database that are connected to the user
-     *
      * @return CollectionModel<EntityModel < FileDto>>>
      */
     @GetMapping("/my-files")
@@ -96,7 +89,6 @@ public class FileController {
 
     /**
      * Getter method to fetch a specific file from the database
-     *
      * @return ResponseEntity<File>
      */
     @GetMapping("/files/{id}")
@@ -106,7 +98,6 @@ public class FileController {
 
     /**
      * Getter method to fetch all the files from the database
-     *
      * @return CollectionModel<EntityModel < FileDto>>>
      */
     @GetMapping("/files")
@@ -119,7 +110,6 @@ public class FileController {
 
     /**
      * Method for downloading a file. The output is in bytes
-     *
      * @return ResponseEntity<ByteArrayResource>
      */
     @GetMapping("/files/download/{id}")

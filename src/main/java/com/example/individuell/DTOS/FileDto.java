@@ -1,11 +1,8 @@
 package com.example.individuell.DTOS;
 
-import com.example.individuell.models.User;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-
 import java.io.Serializable;
 import java.util.HashMap;
 

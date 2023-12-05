@@ -1,9 +1,7 @@
 package com.example.individuell.Assemblers;
 
 import com.example.individuell.Exceptions.FolderNotFoundException;
-import com.example.individuell.controllers.FileController;
 import com.example.individuell.controllers.FolderController;
-import com.example.individuell.models.File;
 import com.example.individuell.models.Folder;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;

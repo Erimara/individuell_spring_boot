@@ -2,19 +2,12 @@ package com.example.individuell.services;
 
 import com.example.individuell.Assemblers.UserModelAssembler;
 import com.example.individuell.Exceptions.UserNotFoundException;
-import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.UserRepository;
 import com.example.individuell.security.Hash;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class UserService {
 

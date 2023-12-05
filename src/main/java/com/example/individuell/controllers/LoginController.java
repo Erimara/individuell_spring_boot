@@ -1,7 +1,6 @@
 package com.example.individuell.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 /**
  * This controller handles endpoints which users are redirected to depending on if they've logged in / are logged in
