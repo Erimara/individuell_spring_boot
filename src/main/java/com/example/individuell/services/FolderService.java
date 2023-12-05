@@ -5,12 +5,15 @@ import com.example.individuell.Assemblers.FolderModelAssembler;
 import com.example.individuell.DTOS.FileDto;
 import com.example.individuell.DTOS.FileInFolderDto;
 import com.example.individuell.DTOS.FolderDto;
+import com.example.individuell.Exceptions.FileNotFoundException;
+import com.example.individuell.Exceptions.FolderNotFoundException;
 import com.example.individuell.models.File;
 import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.FolderRepository;
 import com.example.individuell.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -30,6 +33,7 @@ public class FolderService {
     FolderModelAssembler assembler;
     FolderDtoModelAssembler dtoAssembler;
     AuthenticationProvider authenticationProvider;
+
     @Autowired
     public FolderService(FolderRepository folderRepository, UserRepository userRepository, FolderModelAssembler assembler, FolderDtoModelAssembler dtoAssembler, AuthenticationProvider authenticationProvider) {
         this.folderRepository = folderRepository;
@@ -39,49 +43,39 @@ public class FolderService {
         this.authenticationProvider = authenticationProvider;
     }
 
-    public ResponseEntity<Folder> createFolder(Folder folder) {
-        String username = folderRepository.getLoggedInUser().getName();
+    public Folder createFolder(Folder folder) {
+        String username = userRepository.getLoggedInUser().getName();
         User user = userRepository.findByEmail(username);
         folder.setFolderOwner(user);
-        EntityModel<Folder> entityModel = assembler.toModel(folderRepository.save(folder));
-        //TODO: Add hyperlink to the folderOwner
-        return ResponseEntity.
-                created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entityModel.getContent());
+        folderRepository.save(folder);
+        return folder;
     }
-    public CollectionModel<EntityModel<Folder>> getAllFolders(){
-        List<EntityModel<Folder>> folders = folderRepository.findAll()
-                .stream()
-                .map(assembler::toModel)
-                .collect(Collectors.toList());
-
-        return CollectionModel.of(folders);
+    public List<Folder> getAllFolders() {
+        return folderRepository.findAll();
     }
-
-    public CollectionModel<EntityModel<FolderDto>> viewMyFolders(){
-        String username = folderRepository.getLoggedInUser().getName();
+    @Cacheable(value = "my-folders")
+    public List<FolderDto> viewMyFolders(String username) {
         User user = userRepository.findByEmail(username);
-        List<EntityModel<FolderDto>> folders = folderRepository.findAll()
+        return folderRepository.findAll()
                 .stream()
                 .filter(x -> Objects.equals(x.getFolderOwner().getId(), user.getId()))
                 .map(folder -> {
                     List<FileInFolderDto> fileInFolderDto = folder.getMyFiles().stream()
+                            .filter(Objects::nonNull)
                             .map(file -> new FileInFolderDto(file.getId(), file.getName())).toList();
-                    FolderDto folderDto = new FolderDto(folder.getId(),
+                    return new FolderDto(folder.getId(),
                             folder.getFolderName(),
                             folder.getFolderOwner().getEmail(),
                             new ArrayList<>(fileInFolderDto));
-                    return dtoAssembler.toModel(folderDto);
                 })
                 .collect(Collectors.toList());
-        return CollectionModel.of(folders);
     }
-    public ResponseEntity<?> getFolderById(String id){
-        return ResponseEntity.ok(folderRepository.findById(id));
-    }
+    public Folder getFolderById(String id) throws FolderNotFoundException {
+        return folderRepository.findById(id).orElseThrow(() ->
+                new FolderNotFoundException("Could not find folder with id:" + id));
 
-    public ResponseEntity<Folder> deleteFolderById(String id){
+    }
+    public void deleteFolderById(String id) {
         folderRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }

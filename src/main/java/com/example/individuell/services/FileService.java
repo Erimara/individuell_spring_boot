@@ -34,6 +34,7 @@ public class FileService {
     FileModelAssembler assembler;
     FileDtoModelAssembler dtoAssembler;
     FolderRepository folderRepository;
+
     @Autowired
     public FileService(FileRepository fileRepository, UserRepository userRepository, FileModelAssembler assembler, FileDtoModelAssembler dtoAssembler, FolderRepository folderRepository) {
         this.fileRepository = fileRepository;
@@ -43,22 +44,18 @@ public class FileService {
         this.folderRepository = folderRepository;
     }
 
-    public ResponseEntity<File> uploadSingleFile(MultipartFile file) throws IOException {
+    public File uploadSingleFile(MultipartFile file) throws IOException {
         HashMap<String, String> fileMap = new HashMap<>();
-        String getUsername = fileRepository.getLoggedInUser().getName();
+        String getUsername = userRepository.getLoggedInUser().getName();
         User user = userRepository.findByEmail(getUsername);
         File savedFile = generateFile(file, fileMap, user);
         fileRepository.save(savedFile);
-        EntityModel<File> entityModel = assembler.toModel(savedFile);
-
-        return ResponseEntity.
-                created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entityModel.getContent());
+       return savedFile;
     }
 
-    public ResponseEntity<File> uploadFileToFolder(MultipartFile file, String id) throws IOException {
+    public EntityModel<File> uploadFileToFolder(MultipartFile file, String id) throws IOException {
         HashMap<String, String> fileMap = new HashMap<>();
-        String getUsername = fileRepository.getLoggedInUser().getName();
+        String getUsername = userRepository.getLoggedInUser().getName();
         User user = userRepository.findByEmail(getUsername);
         Folder folder = folderRepository.findById(id).orElseThrow(RuntimeException::new);
 
@@ -67,11 +64,7 @@ public class FileService {
         folder.getMyFiles().add(savedFile);
         fileRepository.save(savedFile);
         folderRepository.save(folder);
-        EntityModel<File> entityModel = assembler.toModel(savedFile);
-
-        return ResponseEntity.
-                created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entityModel.getContent());
+        return assembler.toModel(savedFile);
     }
 
     private File generateFile(MultipartFile file, HashMap<String, String> fileMap, User user) throws IOException {
@@ -85,12 +78,8 @@ public class FileService {
         return savedFile;
     }
 
-    public CollectionModel<EntityModel<File>> getAllFiles(){
-        List<EntityModel<File>> files = fileRepository.findAll()
-                .stream()
-                .map(assembler::toModel)
-                .collect(Collectors.toList());
-        return CollectionModel.of(files);
+    public List<File> getAllFiles() {
+      return fileRepository.findAll();
     }
 
     @Cacheable(value = "my-files")
@@ -107,17 +96,16 @@ public class FileService {
         File file = fileRepository.findById(id)
                 .orElseThrow(() -> new FileNotFoundException("Could not find file with id:" + id));
         byte[] bytes = file.getFileProperties().get("Bytes: ").getBytes();
-        ByteArrayResource resource = new ByteArrayResource(bytes);
-            return resource;
+        return new ByteArrayResource(bytes);
     }
+
     public File getFileById(String id) throws FileNotFoundException {
         return fileRepository.findById(id).orElseThrow(() ->
                 new FileNotFoundException("Could not find file with id:" + id));
     }
 
-    public ResponseEntity<File> deleteFileById(String id){
+    public void deleteFileById(String id) {
         fileRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 
 }

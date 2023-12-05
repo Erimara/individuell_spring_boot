@@ -10,7 +10,4 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public interface FolderRepository extends MongoRepository<Folder,String> {
 
-    default Authentication getLoggedInUser(){
-        return SecurityContextHolder.getContext().getAuthentication();
-    }
 }

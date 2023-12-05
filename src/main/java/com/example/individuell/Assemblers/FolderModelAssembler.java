@@ -1,5 +1,6 @@
 package com.example.individuell.Assemblers;
 
+import com.example.individuell.Exceptions.FolderNotFoundException;
 import com.example.individuell.controllers.FileController;
 import com.example.individuell.controllers.FolderController;
 import com.example.individuell.models.File;
@@ -24,8 +25,12 @@ public class FolderModelAssembler implements RepresentationModelAssembler<Folder
      */
     @Override
     public EntityModel<Folder> toModel(Folder folder) {
-        return EntityModel.of(folder,
-                linkTo(methodOn(FolderController.class).getFolderById(folder.getId())).withSelfRel(),
-                linkTo(methodOn(FolderController.class).getAllFolders()).withRel("folders"));
+        try {
+            return EntityModel.of(folder,
+                    linkTo(methodOn(FolderController.class).getFolderById(folder.getId())).withSelfRel(),
+                    linkTo(methodOn(FolderController.class).getAllFolders()).withRel("folders"));
+        } catch (FolderNotFoundException e) {
+            throw new RuntimeException("Could not assemble Folder");
+        }
     }
 }

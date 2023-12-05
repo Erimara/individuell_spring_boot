@@ -1,6 +1,7 @@
 package com.example.individuell.services;
 
 import com.example.individuell.Assemblers.UserModelAssembler;
+import com.example.individuell.Exceptions.UserNotFoundException;
 import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.UserRepository;
@@ -26,25 +27,19 @@ public class UserService {
         this.assembler = assembler;
         this.hash = hash;
     }
-    public CollectionModel<EntityModel<User>> getAllUsers(){
-
-        List<EntityModel<User>> users = userRepository.findAll()
-                .stream()
-                .map(assembler::toModel)
-                .collect(Collectors.toList());
-        return CollectionModel.of(users);
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
     }
-    public ResponseEntity<?> getUserById(String id){
-        return ResponseEntity.ok(userRepository.findById(id));
+    public User getUserById(String id) throws UserNotFoundException {
+        return userRepository.findById(id).orElseThrow(() ->
+                new UserNotFoundException("Could not find user with id" + id));
     }
 
-    public ResponseEntity<User> registerUser(User user){
+    public User registerUser(User user){
         String encoded = hash.passwordEncoder().encode(user.getPassword());
         user.setPassword(encoded);
         user.setRole("USER");
-        EntityModel<User> entityModel = assembler.toModel(userRepository.save(user));
-        return ResponseEntity.
-                created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entityModel.getContent());
+        userRepository.save(user);
+        return user;
     }
 }

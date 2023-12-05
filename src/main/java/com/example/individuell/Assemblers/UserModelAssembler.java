@@ -1,5 +1,6 @@
 package com.example.individuell.Assemblers;
 
+import com.example.individuell.Exceptions.UserNotFoundException;
 import com.example.individuell.controllers.UserController;
 import com.example.individuell.models.User;
 
@@ -23,8 +24,12 @@ public class UserModelAssembler implements RepresentationModelAssembler<User, En
      */
     @Override
     public EntityModel<User> toModel(User user) {
-      return EntityModel.of(user,
-              linkTo(methodOn(UserController.class).getUserById(user.getId())).withSelfRel(),
-              linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
+        try {
+            return EntityModel.of(user,
+                    linkTo(methodOn(UserController.class).getUserById(user.getId())).withSelfRel(),
+                    linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
+        } catch (UserNotFoundException e) {
+            throw new RuntimeException("Could not assemble user");
+        }
     }
 }

@@ -7,7 +7,4 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public interface FileRepository extends MongoRepository<File, String> {
 
-    default Authentication getLoggedInUser(){
-        return SecurityContextHolder.getContext().getAuthentication();
-    }
 }

@@ -58,16 +58,17 @@ public class SecurityConfig {
                     auth.requestMatchers("/register").permitAll();
                     auth.requestMatchers("/login").permitAll();
                     auth.requestMatchers("/start-page").permitAll();
-                    auth.requestMatchers("/users",
-                            "/users/{id}",
+                    auth.requestMatchers("/users", //SET ADMIN ONLY ACCESS
+                            "/users/{id}",  //SET ADMIN ONLY ACCESS
                             "/upload-file",
                             "/files", //SET ADMIN ONLY ACCESS
+                            "/folders", //SET ADMIN ONLY ACCESS
                             "/create-folder",
-                            "/folder/user/{id}",
                             "/logout",
                             "my-folders",
                             "my-files",
                             "my-files/{id}",
+                            "my-folders/{id}",
                             "folder/upload-file/{id}",
                             "login-successful",
                             "files/download/{id}"

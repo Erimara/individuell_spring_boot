@@ -28,9 +28,13 @@ public class FolderDtoModelAssembler implements RepresentationModelAssembler<Fol
      */
     @Override
     public EntityModel<FolderDto> toModel(FolderDto folderDto) {
+        try {
             return EntityModel.of(folderDto,
                     linkTo(methodOn(FolderController.class).getFolderById(folderDto.getId())).withSelfRel(),
                     linkTo(methodOn(FolderController.class).getAllFolders()).withRel("folders"));
+        } catch (FolderNotFoundException e) {
+            throw new RuntimeException("Could not assemble folderDTO");
+        }
     }
 }
 

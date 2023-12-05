@@ -1,11 +1,13 @@
 package com.example.individuell.controllers;
 
 import com.example.individuell.Assemblers.FileDtoModelAssembler;
+import com.example.individuell.Assemblers.FileModelAssembler;
 import com.example.individuell.DTOS.FileDto;
 import com.example.individuell.Exceptions.FileNotFoundException;
 import com.example.individuell.models.File;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.FileRepository;
+import com.example.individuell.repositories.UserRepository;
 import com.example.individuell.services.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -13,6 +15,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -32,28 +36,38 @@ public class FileController {
     FileService fileService;
 
     FileDtoModelAssembler fileDtoModelAssembler;
+    FileModelAssembler fileModelAssembler;
 
     FileRepository fileRepository;
+
+    UserRepository userRepository;
     @Autowired
-    public FileController(FileService fileService,FileDtoModelAssembler fileDtoModelAssembler,FileRepository fileRepository) {
+    public FileController(FileService fileService, FileDtoModelAssembler fileDtoModelAssembler, FileModelAssembler fileModelAssembler, FileRepository fileRepository, UserRepository userRepository) {
         this.fileService = fileService;
         this.fileDtoModelAssembler = fileDtoModelAssembler;
+        this.fileModelAssembler = fileModelAssembler;
         this.fileRepository = fileRepository;
+        this.userRepository = userRepository;
     }
 
     /**
      * Post method to upload a single file, without a connection to a folder
+     *
      * @param file
      * @return ResponseEntity<file>
      * @throws IOException
      */
     @PostMapping("/upload-file")
     public ResponseEntity<File> uploadSingleFile(@RequestParam("file") MultipartFile file) throws IOException {
-        return fileService.uploadSingleFile(file);
+        EntityModel<File> entityModel = fileModelAssembler.toModel(fileService.uploadSingleFile(file));
+        return ResponseEntity.
+                created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(entityModel.getContent());
     }
 
     /**
      * Post method to upload a file to a specific folder
+     *
      * @param file
      * @param id
      * @return ResponseEntity<file>
@@ -61,22 +75,28 @@ public class FileController {
      */
     @PostMapping("/folder/upload-file/{id}")
     public ResponseEntity<File> uploadFileToFolder(@RequestParam("file") MultipartFile file, @PathVariable String id) throws IOException {
-        return fileService.uploadFileToFolder(file, id);
+        EntityModel<File> entityModel = fileService.uploadFileToFolder(file,id);
+        return ResponseEntity.
+                created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(entityModel.getContent());
     }
 
     /**
      * Getter method to fetch all the files from the database that are connected to the user
-     * @return CollectionModel<EntityModel<FileDto>>>
+     *
+     * @return CollectionModel<EntityModel < FileDto>>>
      */
     @GetMapping("/my-files")
-    public CollectionModel<EntityModel<FileDto>> viewMyFiles(){
-        String user = fileRepository.getLoggedInUser().getName();
+    public CollectionModel<EntityModel<FileDto>> viewMyFiles() {
+        String user = userRepository.getLoggedInUser().getName();
         var myFiles = fileService.viewMyFiles(user).stream().map((file) -> fileDtoModelAssembler.toModel(file))
                 .collect(Collectors.toList());
         return CollectionModel.of(myFiles);
     }
+
     /**
      * Getter method to fetch a specific file from the database
+     *
      * @return ResponseEntity<File>
      */
     @GetMapping("/files/{id}")
@@ -86,14 +106,20 @@ public class FileController {
 
     /**
      * Getter method to fetch all the files from the database
-     * @return CollectionModel<EntityModel<FileDto>>>
+     *
+     * @return CollectionModel<EntityModel < FileDto>>>
      */
     @GetMapping("/files")
-    public CollectionModel<EntityModel<File>> getAllFiles(){
-        return fileService.getAllFiles();
+    public CollectionModel<EntityModel<File>> getAllFiles() {
+        var files = fileService.getAllFiles().stream()
+                .map(fileModelAssembler::toModel)
+                .collect(Collectors.toList());
+        return CollectionModel.of(files);
     }
+
     /**
      * Method for downloading a file. The output is in bytes
+     *
      * @return ResponseEntity<ByteArrayResource>
      */
     @GetMapping("/files/download/{id}")
@@ -108,12 +134,13 @@ public class FileController {
                 .headers(header)
                 .body(file);
     }
+
     /**
      * Method for deleting a file by ID. Returns a "No content, 204" on success.
      */
     @DeleteMapping("/my-files/{id}")
-    public ResponseEntity<File> deleteFileById(@PathVariable String id){
-        return fileService.deleteFileById(id);
+    public ResponseEntity<File> deleteFileById(@PathVariable String id) {
+        fileService.deleteFileById(id);
+        return ResponseEntity.noContent().build();
     }
-
 }

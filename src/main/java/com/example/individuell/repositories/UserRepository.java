@@ -8,6 +8,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public interface UserRepository extends MongoRepository<User, String> {
 
     User findByEmail(String email);
-
+    default Authentication getLoggedInUser(){
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
 
 }
