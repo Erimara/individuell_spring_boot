@@ -2,6 +2,8 @@ package com.example.individuell.services;
 
 import com.example.individuell.Assemblers.FolderDtoModelAssembler;
 import com.example.individuell.Assemblers.FolderModelAssembler;
+import com.example.individuell.DTOS.FileDto;
+import com.example.individuell.DTOS.FileInFolderDto;
 import com.example.individuell.DTOS.FolderDto;
 import com.example.individuell.models.File;
 import com.example.individuell.models.Folder;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -46,7 +49,6 @@ public class FolderService {
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel.getContent());
     }
-
     public CollectionModel<EntityModel<Folder>> getAllFolders(){
         List<EntityModel<Folder>> folders = folderRepository.findAll()
                 .stream()
@@ -63,10 +65,12 @@ public class FolderService {
                 .stream()
                 .filter(x -> Objects.equals(x.getFolderOwner().getId(), user.getId()))
                 .map(folder -> {
+                    List<FileInFolderDto> fileInFolderDto = folder.getMyFiles().stream()
+                            .map(file -> new FileInFolderDto(file.getId(), file.getName())).toList();
                     FolderDto folderDto = new FolderDto(folder.getId(),
                             folder.getFolderName(),
                             folder.getFolderOwner().getEmail(),
-                            folder.getMyFiles().stream().map(File::getName).collect(Collectors.toList()));
+                            new ArrayList<>(fileInFolderDto));
                     return dtoAssembler.toModel(folderDto);
                 })
                 .collect(Collectors.toList());

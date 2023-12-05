@@ -19,17 +19,13 @@ public class UserService {
 
     UserRepository userRepository;
     UserModelAssembler assembler;
-
-
     Hash hash;
-
     @Autowired
     public UserService(UserRepository userRepository, UserModelAssembler assembler, Hash hash) {
         this.userRepository = userRepository;
         this.assembler = assembler;
         this.hash = hash;
     }
-
     public CollectionModel<EntityModel<User>> getAllUsers(){
 
         List<EntityModel<User>> users = userRepository.findAll()
@@ -51,12 +47,4 @@ public class UserService {
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel.getContent());
     }
-
-    public User createFolder(User user, String id){
-        User updatedUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Could not find user"));
-        updatedUser.setMyFolders(user.getMyFolders());
-        User savedUser = userRepository.save(updatedUser);
-        return savedUser;
-    }
-
 }

@@ -13,9 +13,9 @@ public class FolderDto {
     private String id;
     private String folderName;
     private String folderOwner;
-    private List<String> files;
+    private List<FileInFolderDto> files;
 
-    public FolderDto(String id, String folderName, String folderOwner, List<String> files) {
+    public FolderDto(String id, String folderName, String folderOwner, List<FileInFolderDto> files) {
         this.id = id;
         this.folderName = folderName;
         this.folderOwner = folderOwner;
