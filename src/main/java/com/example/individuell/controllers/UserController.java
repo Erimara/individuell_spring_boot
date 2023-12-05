@@ -48,15 +48,4 @@ private UserService userService;
     ResponseEntity<User> createUser(@RequestBody User user){
         return userService.registerUser(user);
     }
-
-    /**
-     * Creates a folder connected to the user. THIS MIGHT BE A DUPLICATE, SEE FOLDERS
-     * @param user
-     * @param id
-     * @return ResponseEntity<User>
-     */
-    @PutMapping("/create-folder/user/{id}")
-    ResponseEntity<User> createFolder(@RequestBody User user, @PathVariable String id){
-        return ResponseEntity.ok(userService.createFolder(user,id));
-    }
 }
