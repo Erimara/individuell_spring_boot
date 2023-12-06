@@ -10,7 +10,9 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import java.time.Duration;
 
-
+/**
+ * This is a configuration class for setting up the redis connection to spring boot
+ */
 @Configuration
 public class RedisConfig {
 
@@ -18,6 +20,11 @@ public class RedisConfig {
     private String host;
     @Value("${spring.data.redis.port}")
     private int port;
+
+    /**
+     * To use spring boot and redis together we use a LettuceConnectionFactory which handles the connection between them
+     * @return RedisConnectionfactory
+     */
     @Bean
     public RedisConnectionFactory redisConnectionFactory(){
         RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host,port);
@@ -25,6 +32,12 @@ public class RedisConfig {
         System.out.println("Redis-connection : " + host + ":" + port);
         return connectionFactory;
     }
+
+    /**
+     * To be able to store cached data in redis we need a bean which configures a ttl and the connection to Redis
+     * @param connectionFactory Is a built in spring method which creates a connection to redis
+     * @return RedisCacheManager, which allows us to handle caching.
+     */
     @Bean
     RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 

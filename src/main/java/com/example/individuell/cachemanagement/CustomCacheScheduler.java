@@ -16,12 +16,16 @@ public class CustomCacheScheduler {
 
     /**
      * Method which takes in another helper method which clears the cache that is saved in redis.
-     * Has a schedule rate of ever 1 min.
+     * Has a schedule rate of every 1 min.
      */
     @Scheduled(fixedRate = 60000)
     public void evictAllcachesAtIntervals() {
         evictAllCaches();
     }
+
+    /**
+     * Evicts (removes/flushes) all of the cached material. Which in this application applies to personal folders/files.
+     */
     public void evictAllCaches() {
         manager.getCacheNames().stream()
                 .forEach(cacheName -> manager.getCache(cacheName).clear());

@@ -11,6 +11,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.stereotype.Service;
 
+/**
+ * A custom UserDetails class which enables a user to log in
+ */
 @Service
 @EnableRedisHttpSession
 public class CustomUserDetails implements UserDetailsService {
@@ -19,6 +22,14 @@ public class CustomUserDetails implements UserDetailsService {
     public CustomUserDetails(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
+    /**
+     * loadByUserName enables a user to log in and matches the login-attempt against the database
+     * A dto is used to not expose the user
+     * @param email the username identifying the user whose data is required.
+     * @return UserDetails
+     * @throws UsernameNotFoundException is an exception by the method which handles errors when a user does not exist.
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 

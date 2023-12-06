@@ -3,6 +3,7 @@ package com.example.individuell.Assemblers;
 
 import com.example.individuell.DTOS.FileDto;
 import com.example.individuell.Exceptions.FileNotFoundException;
+import com.example.individuell.Exceptions.ForbiddenActionException;
 import com.example.individuell.controllers.FileController;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -18,7 +19,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class FileDtoModelAssembler implements RepresentationModelAssembler<FileDto, EntityModel<FileDto>>{
     /**
      * @Override method which exists in RepresentationModelAssembler. It adds links to whatever is shown from the database or saved to the database
-     * @param fileDto
+     * @param fileDto represents the FileDTO class
      * @return EntityModel<FileDto>
      */
     @Override
@@ -27,7 +28,7 @@ public class FileDtoModelAssembler implements RepresentationModelAssembler<FileD
             return EntityModel.of(fileDto,
                     linkTo(methodOn(FileController.class).getFileById(fileDto.getId())).withSelfRel(),
                     linkTo(methodOn(FileController.class).getAllFiles()).withRel("files"));
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | ForbiddenActionException e) {
             throw new RuntimeException(e);
         }
     }

@@ -12,10 +12,10 @@ public class FileInFolderDto implements Serializable {
 
     @Id
     private String id;
-    private String fileOwner;
+    private String fileName;
 
-    public FileInFolderDto(String id, String fileOwner) {
+    public FileInFolderDto(String id, String fileName) {
         this.id = id;
-        this.fileOwner = fileOwner;
+        this.fileName = fileName;
     }
 }

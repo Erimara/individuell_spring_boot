@@ -4,6 +4,7 @@ import com.example.individuell.Assemblers.FileDtoModelAssembler;
 import com.example.individuell.Assemblers.FileModelAssembler;
 import com.example.individuell.DTOS.FileDto;
 import com.example.individuell.Exceptions.FileNotFoundException;
+import com.example.individuell.Exceptions.ForbiddenActionException;
 import com.example.individuell.models.File;
 import com.example.individuell.repositories.FileRepository;
 import com.example.individuell.repositories.UserRepository;
@@ -18,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.stream.Collectors;
 
@@ -28,13 +30,13 @@ import java.util.stream.Collectors;
 public class FileController {
 
     FileService fileService;
-
     FileDtoModelAssembler fileDtoModelAssembler;
     FileModelAssembler fileModelAssembler;
 
     FileRepository fileRepository;
 
     UserRepository userRepository;
+
     @Autowired
     public FileController(FileService fileService, FileDtoModelAssembler fileDtoModelAssembler, FileModelAssembler fileModelAssembler, FileRepository fileRepository, UserRepository userRepository) {
         this.fileService = fileService;
@@ -63,13 +65,13 @@ public class FileController {
      * Post method to upload a file to a specific folder
      *
      * @param file is a Multipart file, which is a class in spring boot
-     * @param id gets the id of a specific folder
+     * @param id   gets the id of a specific folder
      * @return ResponseEntity<file>
      * @throws IOException exception is needed to be able to handle errors when uploading
      */
     @PostMapping("/folder/upload-file/{id}")
     public ResponseEntity<File> uploadFileToFolder(@RequestParam("file") MultipartFile file, @PathVariable String id) throws IOException {
-        EntityModel<File> entityModel = fileService.uploadFileToFolder(file,id);
+        EntityModel<File> entityModel = fileService.uploadFileToFolder(file, id);
         return ResponseEntity.
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(entityModel.getContent());
@@ -77,6 +79,7 @@ public class FileController {
 
     /**
      * Getter method to fetch all the files from the database that are connected to the user
+     *
      * @return CollectionModel<EntityModel < FileDto>>>
      */
     @GetMapping("/my-files")
@@ -89,15 +92,17 @@ public class FileController {
 
     /**
      * Getter method to fetch a specific file from the database
+     *
      * @return ResponseEntity<File>
      */
-    @GetMapping("/files/{id}")
-    public ResponseEntity<File> getFileById(@PathVariable String id) throws FileNotFoundException {
+    @GetMapping("/my-file/{id}")
+    public ResponseEntity<File> getFileById(@PathVariable String id) throws FileNotFoundException, ForbiddenActionException {
         return ResponseEntity.ok(fileService.getFileById(id));
     }
 
     /**
      * Getter method to fetch all the files from the database
+     *
      * @return CollectionModel<EntityModel < FileDto>>>
      */
     @GetMapping("/files")
@@ -110,10 +115,11 @@ public class FileController {
 
     /**
      * Method for downloading a file. The output is in bytes
+     *
      * @return ResponseEntity<ByteArrayResource>
      */
     @GetMapping("/files/download/{id}")
-    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String id) throws FileNotFoundException, IOException {
+    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String id) throws FileNotFoundException {
         ByteArrayResource file = fileService.downloadFile(id);
         HttpHeaders header = new HttpHeaders();
         header.setContentDispositionFormData("file", file.getFilename());
@@ -126,10 +132,14 @@ public class FileController {
     }
 
     /**
-     * Method for deleting a file by ID. Returns a "No content, 204" on success.
+     * Method for deleting a file by ID.
+     *
+     * @param id fins the id of the file
+     * @return ResponseEntity which builds with noContent.
+     * Returns a "No content, 204" on success.
      */
-    @DeleteMapping("/my-files/{id}")
-    public ResponseEntity<File> deleteFileById(@PathVariable String id) {
+    @DeleteMapping("/delete-file/{id}")
+    public ResponseEntity<File> deleteFileById(@PathVariable String id) throws FileNotFoundException, ForbiddenActionException {
         fileService.deleteFileById(id);
         return ResponseEntity.noContent().build();
     }

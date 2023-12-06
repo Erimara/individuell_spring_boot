@@ -17,7 +17,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserModelAssembler implements RepresentationModelAssembler<User, EntityModel<User>>{
     /**
      * @Override method which exists in RepresentationModelAssembler. It adds links to whatever is shown from the database or saved to the database
-     * @param user
+     * @param user represents the User-model class
      * @return EntityModel<User>
      */
     @Override

@@ -1,6 +1,7 @@
 package com.example.individuell.controllers;
 
 import com.example.individuell.Assemblers.UserModelAssembler;
+import com.example.individuell.Exceptions.NonUniqueEmailException;
 import com.example.individuell.Exceptions.UserNotFoundException;
 import com.example.individuell.models.User;
 import com.example.individuell.services.UserService;
@@ -11,6 +12,7 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -19,8 +21,9 @@ import java.util.stream.Collectors;
  */
 @RestController
 public class UserController {
-private UserService userService;
-private UserModelAssembler userModelAssembler;
+    private UserService userService;
+    private UserModelAssembler userModelAssembler;
+
     @Autowired
     public UserController(UserService userService, UserModelAssembler userModelAssembler) {
         this.userService = userService;
@@ -29,10 +32,11 @@ private UserModelAssembler userModelAssembler;
 
     /**
      * Gets all the users in the database
-     * @return CollectionModel<EntityModel<User>>
+     *
+     * @return CollectionModel<EntityModel < User>>
      */
     @GetMapping("/users")
-    public CollectionModel<EntityModel<User>> getAllUsers(){
+    public CollectionModel<EntityModel<User>> getAllUsers() {
         var users = userService.getAllUsers()
                 .stream()
                 .map(userModelAssembler::toModel)
@@ -42,6 +46,7 @@ private UserModelAssembler userModelAssembler;
 
     /**
      * Gets all users by id from the database
+     *
      * @param id
      * @return ResponseEntity<?>
      */
@@ -53,14 +58,17 @@ private UserModelAssembler userModelAssembler;
 
     /**
      * Registers a user and saves it to the database
-     * @param user
-     * @return ResponseEntity<User>
+     *
+     * @param user gets the json data that is fetched during the post request
+     * @return ResponseEntity<String>
      */
     @PostMapping("/register")
-    ResponseEntity<User> registerUser(@RequestBody User user) {
+    ResponseEntity<String> registerUser(@RequestBody User user) throws NonUniqueEmailException {
         EntityModel<User> entityModel = userModelAssembler.toModel(userService.registerUser(user));
+        String registeredUser = """
+                 Registration successful!""" + Objects.requireNonNull(entityModel.getContent()).getEmail();
         return ResponseEntity.
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
-                .body(entityModel.getContent());
+                .body(registeredUser);
     }
 }

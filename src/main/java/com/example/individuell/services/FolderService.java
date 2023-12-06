@@ -4,7 +4,10 @@ import com.example.individuell.Assemblers.FolderDtoModelAssembler;
 import com.example.individuell.Assemblers.FolderModelAssembler;
 import com.example.individuell.DTOS.FileInFolderDto;
 import com.example.individuell.DTOS.FolderDto;
+import com.example.individuell.Exceptions.FileNotFoundException;
 import com.example.individuell.Exceptions.FolderNotFoundException;
+import com.example.individuell.Exceptions.ForbiddenActionException;
+import com.example.individuell.models.File;
 import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.FolderRepository;
@@ -13,11 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Service class which handles the logic for CRUD methods regarding the folder-model class
+ */
 @Service
 public class FolderService {
     FolderRepository folderRepository;
@@ -35,6 +42,12 @@ public class FolderService {
         this.authenticationProvider = authenticationProvider;
     }
 
+    /**
+     * creates a folder and sets the current logged-in user as a folderOwner
+     *
+     * @param folder takes in json data which enables you to create objects that look like the folder-model
+     * @return Folder
+     */
     public Folder createFolder(Folder folder) {
         String username = userRepository.getLoggedInUser().getName();
         User user = userRepository.findByEmail(username);
@@ -42,9 +55,22 @@ public class FolderService {
         folderRepository.save(folder);
         return folder;
     }
+
+    /**
+     * Method for getting all the folders in database. Admin only access
+     *
+     * @return List<Folder>
+     */
     public List<Folder> getAllFolders() {
         return folderRepository.findAll();
     }
+
+    /**
+     * Method blocks users from seeing other peoples folders, and enables to only see your own
+     *
+     * @param username gets the current logged-in user to be able to filter out other users
+     * @return List<FolderDto>
+     */
     @Cacheable(value = "my-folders")
     public List<FolderDto> viewMyFolders(String username) {
         User user = userRepository.findByEmail(username);
@@ -62,12 +88,36 @@ public class FolderService {
                 })
                 .collect(Collectors.toList());
     }
-    public Folder getFolderById(String id) throws FolderNotFoundException {
-        return folderRepository.findById(id).orElseThrow(() ->
+
+    /**
+     * Gets a specific folder by id. Admin only access atm.
+     *
+     * @param id finds the specific folder
+     * @return Folder
+     * @throws FolderNotFoundException is a custom error for throwing a unique error
+     */
+    public Folder getFolderById(String id) throws FolderNotFoundException, ForbiddenActionException {
+        String loggedInUser = userRepository.getLoggedInUser().getName();
+        Folder folder =  folderRepository.findById(id).orElseThrow(() ->
                 new FolderNotFoundException("Could not find folder with id:" + id));
+        if (folder.getFolderOwner().getEmail().equals(loggedInUser)){
+            return folder;
+        } else throw new ForbiddenActionException("Restricted access");
 
     }
-    public void deleteFolderById(String id) {
-        folderRepository.deleteById(id);
+    /**
+     * Deletes a folder by id.
+     *
+     * @param id finds the id of the specific folder
+     */
+    public void deleteFolderById(String id) throws ForbiddenActionException, FolderNotFoundException {
+        String loggedInUser = userRepository.getLoggedInUser().getName();
+        Folder folder =  folderRepository.findById(id).orElseThrow(() ->
+                new FolderNotFoundException("Could not find folder with id:" + id));
+        if (folder.getFolderOwner().getEmail().equals(loggedInUser)) {
+            folderRepository.deleteById(id);
+        } else throw new ForbiddenActionException("Restriction access");
     }
+
+
 }

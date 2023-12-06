@@ -43,20 +43,23 @@ public class SecurityConfig {
                     auth.requestMatchers("/register").permitAll();
                     auth.requestMatchers("/login").permitAll();
                     auth.requestMatchers("/start-page").permitAll();
-                    auth.requestMatchers("/users", //SET ADMIN ONLY ACCESS
-                            "/users/{id}",  //SET ADMIN ONLY ACCESS
+                    auth.requestMatchers("/users",
+                            "/users/{id}",
+                            "/files",
+                            "/folders").hasRole("ADMIN");
+                    auth.requestMatchers(
                             "/upload-file",
-                            "/files", //SET ADMIN ONLY ACCESS
-                            "/folders", //SET ADMIN ONLY ACCESS
                             "/create-folder",
                             "/logout",
                             "my-folders",
                             "my-files",
-                            "my-files/{id}",
-                            "my-folders/{id}",
+                            "my-file/{id}",
+                            "my-folder/{id}",
                             "folder/upload-file/{id}",
                             "login-successful",
-                            "files/download/{id}"
+                            "files/download/{id}",
+                            "/delete-folder/{id}",
+                            "/delete-file/{id}"
                     ).authenticated();
                 })
                 /*.csrf().disable()*//*((csrf) -> {
