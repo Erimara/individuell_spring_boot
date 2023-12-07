@@ -77,14 +77,13 @@ public class UserController {
 
 
     /**
-     *      * Method for deleting a user by ID. Returns a "No content, 204" on success.
+     * Method for deleting a user by ID. Returns a "No content, 204" on success.
      * @param id retrieves the user
      * @return User
-     * @throws ForbiddenActionException forbidden action if user is not permitted to take action
-     * @throws NotFoundException if id is not found
+
      */
     @DeleteMapping("/delete-account/{id}")
-    public ResponseEntity<User> deleteUserById(@PathVariable String id) throws ForbiddenActionException, NotFoundException {
+    public ResponseEntity<User> deleteUserById(@PathVariable String id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }

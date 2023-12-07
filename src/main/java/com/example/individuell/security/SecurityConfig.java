@@ -56,6 +56,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/login").permitAll();
                     auth.requestMatchers("/start-page").permitAll();
                     auth.requestMatchers("/users",
+                            "/delete-account/{id}",
                             "/users/{id}",
                             "/files",
                             "/folders").hasRole("ADMIN"); //ADMIN IS SET THROUGH DATABASE, FOR SECURITY REASONS
@@ -71,8 +72,7 @@ public class SecurityConfig {
                             "/folder/upload-file/{id}",
                             "/files/download/{id}",
                             "/delete-folder/{id}",
-                            "/delete-file/{id}",
-                            "/delete-account/{id}"
+                            "/delete-file/{id}"
                     ).authenticated();
                 })
                 .csrf().disable() // Needed for postman login, can remove for browser-login

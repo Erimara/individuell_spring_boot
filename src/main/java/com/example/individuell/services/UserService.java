@@ -68,12 +68,12 @@ public class UserService {
         }
         return user;
     }
-    public void deleteUserById(String id) throws ForbiddenActionException, NotFoundException {
-        String loggedInUser = userRepository.getLoggedInUser().getName();
-        User user =  userRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Could not find user with id:" + id));
-        if (user.getEmail().equals(loggedInUser)) {
+
+    /**
+     * Deletes a user. ADMIN ONLY ACCESS
+     * @param id retrieves the user
+     */
+    public void deleteUserById(String id) {
             userRepository.deleteById(id);
-        } else throw new ForbiddenActionException("Restricted access");
+        }
     }
-}
