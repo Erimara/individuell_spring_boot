@@ -68,9 +68,10 @@ public class FileController {
      * @param id   gets the id of a specific folder
      * @return ResponseEntity<file>
      * @throws IOException exception is needed to be able to handle errors when uploading
+     * @Throws ForbiddenActionException custom forbidden error
      */
     @PostMapping("/folder/upload-file/{id}")
-    public ResponseEntity<File> uploadFileToFolder(@RequestParam("file") MultipartFile file, @PathVariable String id) throws IOException {
+    public ResponseEntity<File> uploadFileToFolder(@RequestParam("file") MultipartFile file, @PathVariable String id) throws IOException, ForbiddenActionException {
         EntityModel<File> entityModel = fileService.uploadFileToFolder(file, id);
         return ResponseEntity.
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -117,9 +118,10 @@ public class FileController {
      * Method for downloading a file. The output is in bytes
      *
      * @return ResponseEntity<ByteArrayResource>
+     * @Throws ForbiddenActionException custom forbidden error
      */
     @GetMapping("/files/download/{id}")
-    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String id) throws NotFoundException {
+    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String id) throws NotFoundException, ForbiddenActionException {
         ByteArrayResource file = fileService.downloadFile(id);
         HttpHeaders header = new HttpHeaders();
         header.setContentDispositionFormData("file", file.getFilename());

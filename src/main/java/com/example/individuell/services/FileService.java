@@ -73,17 +73,18 @@ public class FileService {
      * @throws IOException handles errors when uploading multipartFiles
      */
 
-    public EntityModel<File> uploadFileToFolder(MultipartFile file, String id) throws IOException {
+    public EntityModel<File> uploadFileToFolder(MultipartFile file, String id) throws IOException, ForbiddenActionException {
         HashMap<String, String> fileMap = new HashMap<>();
-        String getUsername = userRepository.getLoggedInUser().getName();
-        User user = userRepository.findByEmail(getUsername);
+        String loggedInUser = userRepository.getLoggedInUser().getName();
+        User user = userRepository.findByEmail(loggedInUser);
         Folder folder = folderRepository.findById(id).orElseThrow(RuntimeException::new);
-
         File savedFile = generateFile(file, fileMap, user);
 
-        folder.getMyFiles().add(savedFile);
-        fileRepository.save(savedFile);
-        folderRepository.save(folder);
+        if (folder.getFolderOwner().getEmail().equals(loggedInUser)) {
+            folder.getMyFiles().add(savedFile);
+            fileRepository.save(savedFile);
+            folderRepository.save(folder);
+        } else throw new ForbiddenActionException("Restricted access");
         return assembler.toModel(savedFile);
     }
 
@@ -140,11 +141,14 @@ public class FileService {
      * @throws NotFoundException is a custom error for throwing a unique error
      */
 
-    public ByteArrayResource downloadFile(String id) throws NotFoundException {
+    public ByteArrayResource downloadFile(String id) throws NotFoundException, ForbiddenActionException {
+        String loggedInUser = userRepository.getLoggedInUser().getName();
         File file = fileRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Could not find file with id:" + id));
-        byte[] bytes = file.getFileProperties().get("Bytes: ").getBytes();
-        return new ByteArrayResource(bytes);
+        if (file.getFileOwner().getEmail().equals(loggedInUser)) {
+            byte[] bytes = file.getFileProperties().get("Bytes: ").getBytes();
+            return new ByteArrayResource(bytes);
+        } else throw new ForbiddenActionException("Forbidden action");
     }
 
     /**
@@ -155,8 +159,8 @@ public class FileService {
      * @throws NotFoundException is a custom error for throwing a unique error
      */
     public File getFileById(String id) throws NotFoundException, ForbiddenActionException {
-      File file = fileRepository.findById(id).orElseThrow(() -> new NotFoundException("Could not find file with id:" + id));
-      String loggedInUser = userRepository.getLoggedInUser().getName();
+        File file = fileRepository.findById(id).orElseThrow(() -> new NotFoundException("Could not find file with id:" + id));
+        String loggedInUser = userRepository.getLoggedInUser().getName();
         if (file.getFileOwner().getEmail().equals(loggedInUser)) {
             return file;
         } else throw new ForbiddenActionException("Restricted access");
