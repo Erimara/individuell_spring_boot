@@ -77,7 +77,7 @@ public class FolderController {
      * @throws ForbiddenActionException custom exception for error handling
      */
     @GetMapping("/my-folder/{id}")
-    public ResponseEntity<Folder> getFolderById(@PathVariable String id) throws NotFoundException, ForbiddenActionException {
+    public ResponseEntity<FolderDto> getFolderById(@PathVariable String id) throws NotFoundException, ForbiddenActionException {
         var folder = folderService.getFolderById(id);
         return ResponseEntity.ok(folder);
     }

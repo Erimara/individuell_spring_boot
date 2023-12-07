@@ -97,7 +97,7 @@ public class FileController {
      * @return ResponseEntity<File>
      */
     @GetMapping("/my-file/{id}")
-    public ResponseEntity<File> getFileById(@PathVariable String id) throws NotFoundException, ForbiddenActionException {
+    public ResponseEntity<FileDto> getFileById(@PathVariable String id) throws NotFoundException, ForbiddenActionException {
         return ResponseEntity.ok(fileService.getFileById(id));
     }
 

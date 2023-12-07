@@ -158,11 +158,12 @@ public class FileService {
      * @return File
      * @throws NotFoundException is a custom error for throwing a unique error
      */
-    public File getFileById(String id) throws NotFoundException, ForbiddenActionException {
+    public FileDto getFileById(String id) throws NotFoundException, ForbiddenActionException {
         File file = fileRepository.findById(id).orElseThrow(() -> new NotFoundException("Could not find file with id:" + id));
+        FileDto fileDto = new FileDto(file.getId(),file.getFileProperties(),file.getFileOwner().getEmail());
         String loggedInUser = userRepository.getLoggedInUser().getName();
         if (file.getFileOwner().getEmail().equals(loggedInUser)) {
-            return file;
+            return fileDto;
         } else throw new ForbiddenActionException("Restricted access");
     }
 

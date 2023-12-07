@@ -95,12 +95,16 @@ public class FolderService {
      * @throws NotFoundException is a custom error for throwing a unique error
      * @throws ForbiddenActionException is a custom error for throwing a unique error
      */
-    public Folder getFolderById(String id) throws NotFoundException, ForbiddenActionException {
+    public FolderDto getFolderById(String id) throws NotFoundException, ForbiddenActionException {
         String loggedInUser = userRepository.getLoggedInUser().getName();
         Folder folder =  folderRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Could not find folder with id:" + id));
+        List<FileInFolderDto> fileInFolderDto = folder.getMyFiles().stream()
+                .filter(Objects::nonNull)
+                .map(file -> new FileInFolderDto(file.getId(), file.getName())).toList();
+        FolderDto folderDto = new FolderDto(folder.getId(),folder.getFolderName(),folder.getFolderOwner().getEmail(), fileInFolderDto);
         if (folder.getFolderOwner().getEmail().equals(loggedInUser)){
-            return folder;
+            return folderDto;
         } else throw new ForbiddenActionException("Restricted access");
 
     }

@@ -121,7 +121,6 @@ public class SecurityConfig {
         {
             if (authentication != null) {
                 Arrays.stream(request.getCookies()).forEach(cookie -> {
-                    System.out.println(cookie.getName());
                     cookie.setMaxAge(0);
                     response.addCookie(cookie);
                 });
@@ -143,7 +142,7 @@ public class SecurityConfig {
 
     private AuthenticationSuccessHandler authenticationSuccessHandler() {
         return (((request, response, authentication) -> {
-            int durationInMinutes = 5;
+            int durationInMinutes = 5; //Sets duration to five minutes, Only five minutes for testing purposes
             int durationInSeconds = durationInMinutes * 60;
             long expiredTime = System.currentTimeMillis() + (durationInSeconds * 1000);
 
