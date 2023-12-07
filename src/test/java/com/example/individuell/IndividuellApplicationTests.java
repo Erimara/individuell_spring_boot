@@ -70,11 +70,6 @@ class IndividuellApplicationTests {
         fileRepository.findById("test-id-remove-file").ifPresent(presentFile -> fileRepository.deleteById(presentFile.getId()));
         Assertions.assertFalse(fileRepository.existsById(testFile.getId()));
     }
-
-    @Test
-    void loginMultipleUsers(){
-            userDetails.loadUserByUsername("erik@email.se");
-        };
     @AfterEach
     void removeTestData(){
         fileRepository.findById("test-id-file").ifPresent(presentFile -> fileRepository.deleteById(presentFile.getId()));

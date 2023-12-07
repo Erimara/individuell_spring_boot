@@ -11,8 +11,10 @@ import lombok.Setter;
 public class LoginDto {
     private String email;
     private String password;
-    public LoginDto(String email, String password) {
+    private String role;
+    public LoginDto(String email, String password,String role) {
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 }

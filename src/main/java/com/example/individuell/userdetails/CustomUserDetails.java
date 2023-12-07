@@ -25,7 +25,7 @@ public class CustomUserDetails implements UserDetailsService {
 
     /**
      * loadByUserName enables a user to log in and matches the login-attempt against the database
-     * A dto is used to not expose the user
+     * A dto is used to not expose the users files/folders in any way.
      * @param email the username identifying the user whose data is required.
      * @return UserDetails
      * @throws UsernameNotFoundException is an exception by the method which handles errors when a user does not exist.
@@ -38,11 +38,11 @@ public class CustomUserDetails implements UserDetailsService {
             throw new UsernameNotFoundException("User not found");
         }
 
-            LoginDto loginDto = new LoginDto(email, user.getPassword());
+            LoginDto loginDto = new LoginDto(email, user.getPassword(), user.getRole());
             return User.builder()
                     .username(loginDto.getEmail())
                     .password(loginDto.getPassword())
-                    .roles("USER")
+                    .roles(loginDto.getRole())
                     .build();
     }
 }
