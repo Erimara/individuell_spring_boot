@@ -2,7 +2,7 @@ package com.example.individuell.controllers;
 
 import com.example.individuell.Assemblers.UserModelAssembler;
 import com.example.individuell.Exceptions.NonUniqueEmailException;
-import com.example.individuell.Exceptions.UserNotFoundException;
+import com.example.individuell.Exceptions.NotFoundException;
 import com.example.individuell.models.User;
 import com.example.individuell.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  * This controller handles the requests between the client and the server for the users.
- * It also handles the createfolder method which is used to create a foolder to a user
+ * It also handles the createFolder method which is used to create a folder to a user
  */
 @RestController
 public class UserController {
@@ -47,11 +47,12 @@ public class UserController {
     /**
      * Gets all users by id from the database
      *
-     * @param id
+     * @param id takes the id of the user;
      * @return ResponseEntity<?>
+     * @Throws NotFoundException Custom error handling for not finding id
      */
     @GetMapping("/users/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable String id) throws UserNotFoundException {
+    public ResponseEntity<?> getUserById(@PathVariable String id) throws NotFoundException {
         var user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
@@ -63,7 +64,7 @@ public class UserController {
      * @return ResponseEntity<String>
      */
     @PostMapping("/register")
-    ResponseEntity<String> registerUser(@RequestBody User user) throws NonUniqueEmailException {
+    public ResponseEntity<String> registerUser(@RequestBody User user) throws NonUniqueEmailException {
         EntityModel<User> entityModel = userModelAssembler.toModel(userService.registerUser(user));
         String registeredUser = """
                  Registration successful!""" + Objects.requireNonNull(entityModel.getContent()).getEmail();

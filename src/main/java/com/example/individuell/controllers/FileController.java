@@ -3,7 +3,7 @@ package com.example.individuell.controllers;
 import com.example.individuell.Assemblers.FileDtoModelAssembler;
 import com.example.individuell.Assemblers.FileModelAssembler;
 import com.example.individuell.DTOS.FileDto;
-import com.example.individuell.Exceptions.FileNotFoundException;
+import com.example.individuell.Exceptions.NotFoundException;
 import com.example.individuell.Exceptions.ForbiddenActionException;
 import com.example.individuell.models.File;
 import com.example.individuell.repositories.FileRepository;
@@ -96,7 +96,7 @@ public class FileController {
      * @return ResponseEntity<File>
      */
     @GetMapping("/my-file/{id}")
-    public ResponseEntity<File> getFileById(@PathVariable String id) throws FileNotFoundException, ForbiddenActionException {
+    public ResponseEntity<File> getFileById(@PathVariable String id) throws NotFoundException, ForbiddenActionException {
         return ResponseEntity.ok(fileService.getFileById(id));
     }
 
@@ -119,7 +119,7 @@ public class FileController {
      * @return ResponseEntity<ByteArrayResource>
      */
     @GetMapping("/files/download/{id}")
-    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String id) throws FileNotFoundException {
+    public ResponseEntity<ByteArrayResource> downloadFile(@PathVariable String id) throws NotFoundException {
         ByteArrayResource file = fileService.downloadFile(id);
         HttpHeaders header = new HttpHeaders();
         header.setContentDispositionFormData("file", file.getFilename());
@@ -139,7 +139,7 @@ public class FileController {
      * Returns a "No content, 204" on success.
      */
     @DeleteMapping("/delete-file/{id}")
-    public ResponseEntity<File> deleteFileById(@PathVariable String id) throws FileNotFoundException, ForbiddenActionException {
+    public ResponseEntity<File> deleteFileById(@PathVariable String id) throws NotFoundException, ForbiddenActionException {
         fileService.deleteFileById(id);
         return ResponseEntity.noContent().build();
     }

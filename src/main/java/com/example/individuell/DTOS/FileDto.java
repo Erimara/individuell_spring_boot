@@ -6,6 +6,9 @@ import org.springframework.data.annotation.Id;
 import java.io.Serializable;
 import java.util.HashMap;
 
+/**
+ * Data transfer object which is used to only show relevant data in responses and for not exposing critical data
+ */
 @Getter
 @Setter
 public class FileDto implements Serializable {

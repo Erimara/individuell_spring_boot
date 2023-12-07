@@ -3,7 +3,7 @@ package com.example.individuell.services;
 import com.example.individuell.Assemblers.FileDtoModelAssembler;
 import com.example.individuell.Assemblers.FileModelAssembler;
 import com.example.individuell.DTOS.FileDto;
-import com.example.individuell.Exceptions.FileNotFoundException;
+import com.example.individuell.Exceptions.NotFoundException;
 import com.example.individuell.Exceptions.ForbiddenActionException;
 import com.example.individuell.models.File;
 import com.example.individuell.models.Folder;
@@ -137,12 +137,12 @@ public class FileService {
      *
      * @param id finds the id that you want to download
      * @return ByteArrayResource which is displayed in postman as Bytes
-     * @throws FileNotFoundException is a custom error for throwing a unique error
+     * @throws NotFoundException is a custom error for throwing a unique error
      */
 
-    public ByteArrayResource downloadFile(String id) throws FileNotFoundException {
+    public ByteArrayResource downloadFile(String id) throws NotFoundException {
         File file = fileRepository.findById(id)
-                .orElseThrow(() -> new FileNotFoundException("Could not find file with id:" + id));
+                .orElseThrow(() -> new NotFoundException("Could not find file with id:" + id));
         byte[] bytes = file.getFileProperties().get("Bytes: ").getBytes();
         return new ByteArrayResource(bytes);
     }
@@ -152,10 +152,10 @@ public class FileService {
      *
      * @param id finds the specific file by id
      * @return File
-     * @throws FileNotFoundException is a custom error for throwing a unique error
+     * @throws NotFoundException is a custom error for throwing a unique error
      */
-    public File getFileById(String id) throws FileNotFoundException, ForbiddenActionException {
-      File file = fileRepository.findById(id).orElseThrow(() -> new FileNotFoundException("Could not find file with id:" + id));
+    public File getFileById(String id) throws NotFoundException, ForbiddenActionException {
+      File file = fileRepository.findById(id).orElseThrow(() -> new NotFoundException("Could not find file with id:" + id));
       String loggedInUser = userRepository.getLoggedInUser().getName();
         if (file.getFileOwner().getEmail().equals(loggedInUser)) {
             return file;
@@ -168,9 +168,9 @@ public class FileService {
      * @param id fins the id of the specific file
      */
 
-    public void deleteFileById(String id) throws FileNotFoundException, ForbiddenActionException {
+    public void deleteFileById(String id) throws NotFoundException, ForbiddenActionException {
         String loggedInUser = userRepository.getLoggedInUser().getName();
-        File file = fileRepository.findById(id).orElseThrow(() -> new FileNotFoundException("Could not find file with id:" + id));
+        File file = fileRepository.findById(id).orElseThrow(() -> new NotFoundException("Could not find file with id:" + id));
         if (file.getFileOwner().getEmail().equals(loggedInUser)) {
             fileRepository.deleteById(id);
         } else throw new ForbiddenActionException("Restriction access");

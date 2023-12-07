@@ -3,8 +3,8 @@ package com.example.individuell.controllers;
 import com.example.individuell.Assemblers.FolderDtoModelAssembler;
 import com.example.individuell.Assemblers.FolderModelAssembler;
 import com.example.individuell.DTOS.FolderDto;
-import com.example.individuell.Exceptions.FolderNotFoundException;
 import com.example.individuell.Exceptions.ForbiddenActionException;
+import com.example.individuell.Exceptions.NotFoundException;
 import com.example.individuell.models.Folder;
 import com.example.individuell.repositories.FolderRepository;
 import com.example.individuell.repositories.UserRepository;
@@ -31,11 +31,7 @@ public class FolderController {
     UserRepository userRepository;
 
     @Autowired
-    public FolderController(FolderService folderService,
-                            FolderRepository folderRepository,
-                            FolderDtoModelAssembler folderDtoModelAssembler,
-                            FolderModelAssembler folderModelAssembler,
-                            UserRepository userRepository) {
+    public FolderController(FolderService folderService,FolderRepository folderRepository, FolderDtoModelAssembler folderDtoModelAssembler, FolderModelAssembler folderModelAssembler, UserRepository userRepository) {
         this.folderService = folderService;
         this.folderRepository = folderRepository;
         this.folderDtoModelAssembler = folderDtoModelAssembler;
@@ -77,10 +73,11 @@ public class FolderController {
      *
      * @param id finds the id for the specific folder
      * @return ResponseEntity<Folder>
-     * @throws FolderNotFoundException custom exception for error handling
+     * @throws NotFoundException custom exception for error handling
+     * @throws ForbiddenActionException custom exception for error handling
      */
     @GetMapping("/my-folder/{id}")
-    public ResponseEntity<Folder> getFolderById(@PathVariable String id) throws FolderNotFoundException, ForbiddenActionException {
+    public ResponseEntity<Folder> getFolderById(@PathVariable String id) throws NotFoundException, ForbiddenActionException {
         var folder = folderService.getFolderById(id);
         return ResponseEntity.ok(folder);
     }
@@ -102,7 +99,7 @@ public class FolderController {
      * Method for deleting a folder by ID. Returns a "No content, 204" on success.
      */
     @DeleteMapping("/delete-folder/{id}")
-    public ResponseEntity<Folder> deleteFolderById(@PathVariable String id) throws ForbiddenActionException, FolderNotFoundException {
+    public ResponseEntity<Folder> deleteFolderById(@PathVariable String id) throws ForbiddenActionException, NotFoundException {
         folderService.deleteFolderById(id);
         return ResponseEntity.noContent().build();
     }

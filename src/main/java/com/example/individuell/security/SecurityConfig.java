@@ -16,12 +16,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+
 import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+/**
+ * Main-class for setting up the security for spring boot.
+ * The class uses redisTemplate for key management
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -36,6 +41,13 @@ public class SecurityConfig {
         this.redisTemplate = redisTemplate;
     }
 
+    /**
+     * FilterChain that acts as a gatekeeper to enable or disable users from accessing certain endpoints.
+     *
+     * @param https is the standard class from spring-boot-security. It allows us to handle authentication/authorization/requests/responses
+     * @return authorization and access for endpoints
+     * @throws Exception casts a detailed error message for error management
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity https) throws Exception {
         return https.
@@ -46,38 +58,33 @@ public class SecurityConfig {
                     auth.requestMatchers("/users",
                             "/users/{id}",
                             "/files",
-                            "/folders").hasRole("ADMIN");
+                            "/folders").hasRole("ADMIN"); //ADMIN IS SET THROUGH DATABASE, FOR SECURITY REASONS
                     auth.requestMatchers(
+                            "/login-successful",
+                            "/logout",
                             "/upload-file",
                             "/create-folder",
-                            "/logout",
-                            "my-folders",
-                            "my-files",
-                            "my-file/{id}",
-                            "my-folder/{id}",
-                            "folder/upload-file/{id}",
-                            "login-successful",
-                            "files/download/{id}",
+                            "/my-folders",
+                            "/my-files",
+                            "/my-file/{id}",
+                            "/my-folder/{id}",
+                            "/folder/upload-file/{id}",
+                            "/files/download/{id}",
                             "/delete-folder/{id}",
                             "/delete-file/{id}"
                     ).authenticated();
                 })
-                /*.csrf().disable()*//*((csrf) -> {
-                    csrf.ignoringRequestMatchers("/login")
-                            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                            .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler());
-                })*/
                 .csrf().disable() // Needed for postman login, can remove for browser-login
-                .formLogin(withDefaults())
+                .formLogin(withDefaults()) // Sets up the standard spring boot login form in localhost
                 .formLogin((login) -> {
                     login.defaultSuccessUrl("/login-successful");
                     login.successHandler(authenticationSuccessHandler());
                 })
-                .sessionManagement(session -> {
+                .sessionManagement(session -> { //Enables sessions
                     session.invalidSessionUrl("/start-page");
                     session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
                 })
-                .logout((logOut -> {
+                .logout((logOut -> { //Enables logout and does some clean up regarding authentication
                     logOut.logoutUrl("/logout");
                     logOut.logoutSuccessUrl("/start-page");
                     logOut.clearAuthentication(true);
@@ -87,6 +94,12 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * The authenticationProvider is essential for being able to log in.
+     * The method takes in the custom user details and hashes the password during authentication which it then verifies
+     *
+     * @return AuthenticationProvider
+     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -94,6 +107,14 @@ public class SecurityConfig {
         provider.setPasswordEncoder(hash.passwordEncoder());
         return provider;
     }
+
+    /**
+     * LogoutHandler which clears cookies, cleans up redis-keys and invalidates sessions
+     * messages are also printed to the console to be able to see who what is happening
+     *
+     * @return LogoutHandler
+     */
+
     private LogoutHandler logOutHandler() {
         //TODO: Do cleanup
         return ((request, response, authentication) ->
@@ -112,6 +133,14 @@ public class SecurityConfig {
         }
         );
     }
+
+    /**
+     * Method creates a cookie that is sent to the client with a unique id.
+     * The duration is also saved to redis for easy and safe management for being able to log out user when their session expires
+     *
+     * @return AuthenticationSuccessHandler
+     */
+
     private AuthenticationSuccessHandler authenticationSuccessHandler() {
         return (((request, response, authentication) -> {
             int durationInMinutes = 5;
@@ -134,9 +163,13 @@ public class SecurityConfig {
 
         }));
     }
-    private void cleanUpKeys(){
+
+    /**
+     * Helper that loops through the duration keys set above. Is used in the logout method to clear the duration if the user decides to log out manually.
+     */
+    private void cleanUpKeys() {
         Set<String> durationKeys = redisTemplate.keys("duration*");
-        if (durationKeys == null){
+        if (durationKeys == null) {
             return;
         }
         for (String dKey : durationKeys) {
@@ -145,10 +178,10 @@ public class SecurityConfig {
             if (duration == null) {
                 return;
             }
-            if (name == null){
+            if (name == null) {
                 return;
             }
-            if (dKey.contains(name)){
+            if (dKey.contains(name)) {
                 redisTemplate.delete(dKey);
             }
 

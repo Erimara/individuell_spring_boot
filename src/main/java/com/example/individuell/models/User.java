@@ -4,7 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+/**
+ * Class which represents the @Document that resides in MongoDb. Lombok is used to get and set the fields in the class.
+ */
 @Setter
 @Getter
 @Document(collection = "users")

@@ -1,7 +1,7 @@
 package com.example.individuell.Assemblers;
 import com.example.individuell.DTOS.FolderDto;
-import com.example.individuell.Exceptions.FolderNotFoundException;
 import com.example.individuell.Exceptions.ForbiddenActionException;
+import com.example.individuell.Exceptions.NotFoundException;
 import com.example.individuell.controllers.FolderController;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -17,6 +17,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class FolderDtoModelAssembler implements RepresentationModelAssembler<FolderDto, EntityModel<FolderDto>>{
     /**
      * @Override method which exists in RepresentationModelAssembler. It adds links to whatever is shown from the database or saved to the database
+     * Catches eventual failures where id is not found and throws runtime exception
      * @param folderDto represents the FolderDTO class
      * @return EntityModel<folderDto>
      */
@@ -26,10 +27,10 @@ public class FolderDtoModelAssembler implements RepresentationModelAssembler<Fol
             return EntityModel.of(folderDto,
                     linkTo(methodOn(FolderController.class).getFolderById(folderDto.getId())).withSelfRel(),
                     linkTo(methodOn(FolderController.class).getAllFolders()).withRel("folders"));
-        } catch (FolderNotFoundException e) {
-            throw new RuntimeException("Could not assemble folderDTO");
+        } catch (NotFoundException e) {
+            throw new RuntimeException("Could not assemble folderDTO, folder not found");
         } catch (ForbiddenActionException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("A forbidden request was made");
         }
     }
 }

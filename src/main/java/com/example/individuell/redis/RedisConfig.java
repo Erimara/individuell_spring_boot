@@ -12,6 +12,7 @@ import java.time.Duration;
 
 /**
  * This is a configuration class for setting up the redis connection to spring boot
+ * @Value is connected to the application.properties file, this is because my port is dynamic and change when I reboot redis.
  */
 @Configuration
 public class RedisConfig {
@@ -35,7 +36,7 @@ public class RedisConfig {
 
     /**
      * To be able to store cached data in redis we need a bean which configures a ttl and the connection to Redis
-     * @param connectionFactory Is a built in spring method which creates a connection to redis
+     * @param connectionFactory Is a built-in spring method which creates a connection to redis
      * @return RedisCacheManager, which allows us to handle caching.
      */
     @Bean

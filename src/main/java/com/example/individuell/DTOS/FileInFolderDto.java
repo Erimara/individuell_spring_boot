@@ -5,6 +5,10 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
+
+/**
+ * Data transfer object which is used to only show relevant data in responses and for not exposing critical data
+ */
 @Getter
 @Setter
 public class FileInFolderDto implements Serializable {

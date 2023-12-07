@@ -2,7 +2,7 @@ package com.example.individuell.services;
 
 import com.example.individuell.Assemblers.UserModelAssembler;
 import com.example.individuell.Exceptions.NonUniqueEmailException;
-import com.example.individuell.Exceptions.UserNotFoundException;
+import com.example.individuell.Exceptions.NotFoundException;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.UserRepository;
 import com.example.individuell.security.Hash;
@@ -41,10 +41,11 @@ public class UserService {
      * Gets a specific user by id. Admin only access atm
      *
      * @return User
+     * @Throws NotFoundException custom error class for handling error messages
      */
-    public User getUserById(String id) throws UserNotFoundException {
+    public User getUserById(String id) throws NotFoundException {
         return userRepository.findById(id).orElseThrow(() ->
-                new UserNotFoundException("Could not find user with id" + id));
+                new NotFoundException("Could not find user with id" + id));
     }
 
     /**

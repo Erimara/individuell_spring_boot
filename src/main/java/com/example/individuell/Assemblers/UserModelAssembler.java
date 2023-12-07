@@ -1,6 +1,6 @@
 package com.example.individuell.Assemblers;
 
-import com.example.individuell.Exceptions.UserNotFoundException;
+import com.example.individuell.Exceptions.NotFoundException;
 import com.example.individuell.controllers.UserController;
 import com.example.individuell.models.User;
 import org.springframework.hateoas.EntityModel;
@@ -17,6 +17,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserModelAssembler implements RepresentationModelAssembler<User, EntityModel<User>>{
     /**
      * @Override method which exists in RepresentationModelAssembler. It adds links to whatever is shown from the database or saved to the database
+     * Catches eventual failures where id is not found and throws runtime exception
      * @param user represents the User-model class
      * @return EntityModel<User>
      */
@@ -26,8 +27,8 @@ public class UserModelAssembler implements RepresentationModelAssembler<User, En
             return EntityModel.of(user,
                     linkTo(methodOn(UserController.class).getUserById(user.getId())).withSelfRel(),
                     linkTo(methodOn(UserController.class).getAllUsers()).withRel("users"));
-        } catch (UserNotFoundException e) {
-            throw new RuntimeException("Could not assemble user");
+        } catch (NotFoundException e) {
+            throw new RuntimeException("Could not assemble user, user not found");
         }
     }
 }

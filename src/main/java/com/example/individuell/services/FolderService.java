@@ -4,10 +4,8 @@ import com.example.individuell.Assemblers.FolderDtoModelAssembler;
 import com.example.individuell.Assemblers.FolderModelAssembler;
 import com.example.individuell.DTOS.FileInFolderDto;
 import com.example.individuell.DTOS.FolderDto;
-import com.example.individuell.Exceptions.FileNotFoundException;
-import com.example.individuell.Exceptions.FolderNotFoundException;
 import com.example.individuell.Exceptions.ForbiddenActionException;
-import com.example.individuell.models.File;
+import com.example.individuell.Exceptions.NotFoundException;
 import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.FolderRepository;
@@ -94,12 +92,13 @@ public class FolderService {
      *
      * @param id finds the specific folder
      * @return Folder
-     * @throws FolderNotFoundException is a custom error for throwing a unique error
+     * @throws NotFoundException is a custom error for throwing a unique error
+     * @throws ForbiddenActionException is a custom error for throwing a unique error
      */
-    public Folder getFolderById(String id) throws FolderNotFoundException, ForbiddenActionException {
+    public Folder getFolderById(String id) throws NotFoundException, ForbiddenActionException {
         String loggedInUser = userRepository.getLoggedInUser().getName();
         Folder folder =  folderRepository.findById(id).orElseThrow(() ->
-                new FolderNotFoundException("Could not find folder with id:" + id));
+                new NotFoundException("Could not find folder with id:" + id));
         if (folder.getFolderOwner().getEmail().equals(loggedInUser)){
             return folder;
         } else throw new ForbiddenActionException("Restricted access");
@@ -109,11 +108,13 @@ public class FolderService {
      * Deletes a folder by id.
      *
      * @param id finds the id of the specific folder
+     * @throws NotFoundException is a custom error for throwing a unique error
+     * @throws ForbiddenActionException is a custom error for throwing a unique error
      */
-    public void deleteFolderById(String id) throws ForbiddenActionException, FolderNotFoundException {
+    public void deleteFolderById(String id) throws ForbiddenActionException, NotFoundException {
         String loggedInUser = userRepository.getLoggedInUser().getName();
         Folder folder =  folderRepository.findById(id).orElseThrow(() ->
-                new FolderNotFoundException("Could not find folder with id:" + id));
+                new NotFoundException("Could not find folder with id:" + id));
         if (folder.getFolderOwner().getEmail().equals(loggedInUser)) {
             folderRepository.deleteById(id);
         } else throw new ForbiddenActionException("Restriction access");

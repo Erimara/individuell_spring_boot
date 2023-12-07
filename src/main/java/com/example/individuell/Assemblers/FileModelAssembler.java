@@ -1,7 +1,7 @@
 package com.example.individuell.Assemblers;
 
 
-import com.example.individuell.Exceptions.FileNotFoundException;
+import com.example.individuell.Exceptions.NotFoundException;
 import com.example.individuell.Exceptions.ForbiddenActionException;
 import com.example.individuell.controllers.FileController;
 import com.example.individuell.models.File;
@@ -20,6 +20,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class FileModelAssembler implements RepresentationModelAssembler<File, EntityModel<File>>{
     /**
      * @Override method which exists in RepresentationModelAssembler. It adds links to whatever is shown from the database or saved to the database
+     * Catches eventual failures where id is not found and throws runtime exception
      * @param file represents the File-model class
      * @return EntityModel<File>
      */
@@ -29,8 +30,8 @@ public class FileModelAssembler implements RepresentationModelAssembler<File, En
             return EntityModel.of(file,
                     linkTo(methodOn(FileController.class).getFileById(file.getId())).withSelfRel(),
                     linkTo(methodOn(FileController.class).getAllFiles()).withRel("files"));
-        } catch (FileNotFoundException | ForbiddenActionException e) {
-            throw new RuntimeException(e);
+        } catch (NotFoundException | ForbiddenActionException e) {
+            throw new RuntimeException("A forbidden request was made");
         }
     }
 }
