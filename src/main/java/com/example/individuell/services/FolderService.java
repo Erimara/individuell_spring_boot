@@ -117,7 +117,7 @@ public class FolderService {
                 new NotFoundException("Could not find folder with id:" + id));
         if (folder.getFolderOwner().getEmail().equals(loggedInUser)) {
             folderRepository.deleteById(id);
-        } else throw new ForbiddenActionException("Restriction access");
+        } else throw new ForbiddenActionException("Restricted access");
     }
 
 
