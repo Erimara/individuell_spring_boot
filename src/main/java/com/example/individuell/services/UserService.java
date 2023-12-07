@@ -1,8 +1,10 @@
 package com.example.individuell.services;
 
 import com.example.individuell.Assemblers.UserModelAssembler;
+import com.example.individuell.Exceptions.ForbiddenActionException;
 import com.example.individuell.Exceptions.NonUniqueEmailException;
 import com.example.individuell.Exceptions.NotFoundException;
+import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
 import com.example.individuell.repositories.UserRepository;
 import com.example.individuell.security.Hash;
@@ -64,7 +66,14 @@ public class UserService {
         } else {
             userRepository.save(user);
         }
-
         return user;
+    }
+    public void deleteUserById(String id) throws ForbiddenActionException, NotFoundException {
+        String loggedInUser = userRepository.getLoggedInUser().getName();
+        User user =  userRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Could not find user with id:" + id));
+        if (user.getEmail().equals(loggedInUser)) {
+            userRepository.deleteById(id);
+        } else throw new ForbiddenActionException("Restricted access");
     }
 }

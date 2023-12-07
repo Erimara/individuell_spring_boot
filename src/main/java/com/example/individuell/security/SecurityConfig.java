@@ -71,7 +71,8 @@ public class SecurityConfig {
                             "/folder/upload-file/{id}",
                             "/files/download/{id}",
                             "/delete-folder/{id}",
-                            "/delete-file/{id}"
+                            "/delete-file/{id}",
+                            "/delete-account/{id}"
                     ).authenticated();
                 })
                 .csrf().disable() // Needed for postman login, can remove for browser-login

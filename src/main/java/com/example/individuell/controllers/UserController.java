@@ -1,8 +1,10 @@
 package com.example.individuell.controllers;
 
 import com.example.individuell.Assemblers.UserModelAssembler;
+import com.example.individuell.Exceptions.ForbiddenActionException;
 import com.example.individuell.Exceptions.NonUniqueEmailException;
 import com.example.individuell.Exceptions.NotFoundException;
+import com.example.individuell.models.Folder;
 import com.example.individuell.models.User;
 import com.example.individuell.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,5 +73,19 @@ public class UserController {
         return ResponseEntity.
                 created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
                 .body(registeredUser);
+    }
+
+
+    /**
+     *      * Method for deleting a user by ID. Returns a "No content, 204" on success.
+     * @param id retrieves the user
+     * @return User
+     * @throws ForbiddenActionException forbidden action if user is not permitted to take action
+     * @throws NotFoundException if id is not found
+     */
+    @DeleteMapping("/delete-account/{id}")
+    public ResponseEntity<User> deleteUserById(@PathVariable String id) throws ForbiddenActionException, NotFoundException {
+        userService.deleteUserById(id);
+        return ResponseEntity.noContent().build();
     }
 }
